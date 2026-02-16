@@ -1,106 +1,75 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
+import json
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="centered")
 
-# --- BARRA LATERAL (CLAVE VIP) ---
+# --- BARRA LATERAL ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2922/2922510.png", width=100)
     st.header("Zona VIP")
     clave_ingresada = st.text_input("🔑 Ingresá tu Clave de Acceso", type="password")
     
-    # Buscamos la API KEY
     if "GEMINI_API_KEY" in st.secrets:
         api_key = st.secrets["GEMINI_API_KEY"]
     else:
         st.error("⚠️ Falta configurar la API Key en los Secretos.")
         api_key = ""
 
-# --- TÍTULO PRINCIPAL ---
-st.title("💎 Vínculo Nítido")
-st.subheader("Traductor de Mensajes Confusos a Verdad Soberana")
-
-# --- PESTAÑAS ---
-tab1, tab2, tab3 = st.tabs(["🕵️‍♀️ Test Gratuito", "💬 Analizar Chat (VIP)", "🍷 Analizar Cita (VIP)"])
-
-# --- PESTAÑA 1: TEST GRATUITO ---
-with tab1:
-    st.info("Descubrí qué perfil tiene el hombre con el que tratás.")
-    perfil = st.radio("¿Cuál es su comportamiento principal?", 
-                      ["Se aleja cuando hay intimidad (Miedo)", 
-                       "Promete y no cumple (Inmadurez)", 
-                       "Aparece y desaparece (Intermitencia)",
-                       "Te hace sentir culpable (Manipulación)"])
-    
-    if st.button("Ver Diagnóstico Rápido"):
-        if "aleja" in perfil:
-            st.warning("🚨 Perfil Detectado: CAPITÁN DE CRISTAL. Su distancia no es desinterés, es pánico a sentir.")
-        elif "Promete" in perfil:
-            st.warning("🎈 Perfil Detectado: PETER PAN. Busca una madre, no una pareja.")
-        elif "Aparece" in perfil:
-            st.warning("👻 Perfil Detectado: EL FANTASMA. Solo vuelve para verificar que seguís disponible.")
-        else:
-            st.error("🐍 Perfil Detectado: NARCISISTA ENCUBIERTO. Cuidado, tu autoestima está en juego.")
-        
-        st.success("💡 ¿Querés saber qué esconden sus chats? Pasate a la pestaña VIP.")
-
-# --- LÓGICA DE IA ---
-def consultar_ia(prompt):
+# --- FUNCIÓN DE CONEXIÓN DIRECTA (SIN INTERMEDIARIOS) ---
+def consultar_ia_directa(prompt):
     if not api_key:
-        return "Error: No hay API Key configurada."
+        return "Error: No hay API Key."
+    
+    # URL directa a la API de Google (Modelo 1.5 Flash)
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+    
     try:
-        genai.configure(api_key=api_key)
-        # USAMOS EL MODELO QUE VIMOS QUE FUNCIONA
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        response = model.generate_content(prompt)
-        return response.text
+        response = requests.post(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            # Si salió bien, extraemos el texto
+            resultado = response.json()
+            return resultado['candidates'][0]['content']['parts'][0]['text']
+        else:
+            # Si salió mal, mostramos el error crudo de Google para saber qué pasa
+            return f"Error {response.status_code}: {response.text}"
+            
     except Exception as e:
         return f"Error de conexión: {str(e)}"
 
-# --- PESTAÑA 2: ANALIZAR CHAT ---
+# --- INTERFAZ PRINCIPAL ---
+st.title("💎 Vínculo Nítido")
+st.subheader("Traductor de Mensajes Confusos a Verdad Soberana")
+
+tab1, tab2 = st.tabs(["🕵️‍♀️ Test Rápido", "💬 Analizar Chat (VIP)"])
+
+with tab1:
+    st.info("Diagnóstico Express")
+    perfil = st.radio("Conducta principal:", ["Se aleja (Miedo)", "Promete y no cumple (Inmaduro)", "Intermitente (Fantasma)"])
+    if st.button("Ver Resultado"):
+        st.warning(f"Posible perfil detectado para: {perfil}. Pasate al VIP para más detalle.")
+
 with tab2:
-    st.write("Copiá la conversación y obtené la traducción real.")
-    chat_texto = st.text_area("Pegá el chat aquí:", height=200)
+    st.write("Pegá la conversación para analizarla con IA Real.")
+    chat_texto = st.text_area("Chat:", height=200)
     
     if st.button("✨ Analizar Verdad"):
         if clave_ingresada == "soberana2026":
             if chat_texto:
-                with st.spinner("La IA está leyendo entre líneas..."):
-                    prompt = f"""
-                    Actúa como una experta en psicología vincular y comportamiento humano. 
-                    Analiza este chat de WhatsApp: "{chat_texto}".
-                    
-                    RESPONDÉ CON ESTA ESTRUCTURA:
-                    1. 🚩 **El Patrón Oculto:** (¿Qué está haciendo él realmente? ¿Love bombing, breadcrumbing, negging?).
-                    2. 🧠 **Análisis Psicológico:** (¿Por qué actúa así? Miedos, ego, apego).
-                    3. 👁️ **Traducción Nítida:** (Lo que dice vs. Lo que realmente significa).
-                    4. 👑 **Consejo Soberano:** (Acción concreta y digna para ella. Sin juegos, límites claros).
-                    """
-                    resultado = consultar_ia(prompt)
+                with st.spinner("Conectando directo con el cerebro de Google..."):
+                    prompt = f"Actúa como psicóloga experta. Analiza este chat: '{chat_texto}'. Dame: 1. Patrón oculto. 2. Qué siente ella. 3. Traducción real. 4. Consejo directo."
+                    resultado = consultar_ia_directa(prompt)
                     st.markdown(resultado)
             else:
-                st.warning("Pegá un chat primero.")
+                st.warning("Escribí algo.")
         else:
-            st.error("⛔ Acceso Denegado. Clave incorrecta.")
-
-# --- PESTAÑA 3: ANALIZAR CITA ---
-with tab3:
-    st.write("Contame qué pasó en la cita.")
-    relato = st.text_area("Escribí los detalles aquí:", height=150)
-    
-    if st.button("🔮 Diagnosticar Encuentro"):
-        if clave_ingresada == "soberana2026":
-            if relato:
-                with st.spinner("Analizando micro-gestos..."):
-                    prompt = f"""
-                    Analiza esta cita: "{relato}".
-                    Detectá Red Flags (peligros) y Green Flags (señales sanas).
-                    ¿Vale la pena una segunda cita? Sé brutalmente honesta y protegé la autoestima de la mujer.
-                    """
-                    resultado = consultar_ia(prompt)
-                    st.markdown(resultado)
-            else:
-                st.warning("Escribí algo sobre la cita.")
-        else:
-            st.error("⛔ Acceso Denegado. Clave incorrecta.")
+            st.error("⛔ Clave incorrecta.")
