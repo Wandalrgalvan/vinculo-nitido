@@ -16,7 +16,16 @@ with st.sidebar:
     else:
         st.error("⚠️ Falta configurar la API Key en los Secretos.")
         api_key = ""
-
+    if st.button("🛠️ Ver Modelos Disponibles"):
+        try:
+            genai.configure(api_key=api_key)
+            modelos = genai.list_models()
+            for m in modelos:
+                if 'generateContent' in m.supported_generation_methods:
+                    st.code(m.name)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            
 # --- TÍTULO PRINCIPAL ---
 st.title("💎 Vínculo Nítido")
 st.subheader("Traductor de Mensajes Confusos a Verdad Soberana")
