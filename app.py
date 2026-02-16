@@ -10,22 +10,13 @@ with st.sidebar:
     st.header("Zona VIP")
     clave_ingresada = st.text_input("🔑 Ingresá tu Clave de Acceso", type="password")
     
-    # Buscamos la API KEY escondida en los secretos
+    # Buscamos la API KEY
     if "GEMINI_API_KEY" in st.secrets:
         api_key = st.secrets["GEMINI_API_KEY"]
     else:
         st.error("⚠️ Falta configurar la API Key en los Secretos.")
         api_key = ""
-    if st.button("🛠️ Ver Modelos Disponibles"):
-        try:
-            genai.configure(api_key=api_key)
-            modelos = genai.list_models()
-            for m in modelos:
-                if 'generateContent' in m.supported_generation_methods:
-                    st.code(m.name)
-        except Exception as e:
-            st.error(f"Error: {e}")
-            
+
 # --- TÍTULO PRINCIPAL ---
 st.title("💎 Vínculo Nítido")
 st.subheader("Traductor de Mensajes Confusos a Verdad Soberana")
@@ -36,7 +27,6 @@ tab1, tab2, tab3 = st.tabs(["🕵️‍♀️ Test Gratuito", "💬 Analizar Cha
 # --- PESTAÑA 1: TEST GRATUITO ---
 with tab1:
     st.info("Descubrí qué perfil tiene el hombre con el que tratás.")
-    
     perfil = st.radio("¿Cuál es su comportamiento principal?", 
                       ["Se aleja cuando hay intimidad (Miedo)", 
                        "Promete y no cumple (Inmadurez)", 
@@ -55,12 +45,13 @@ with tab1:
         
         st.success("💡 ¿Querés saber qué esconden sus chats? Pasate a la pestaña VIP.")
 
-# --- LÓGICA DE INTELIGENCIA ARTIFICIAL ---
+# --- LÓGICA DE IA ---
 def consultar_ia(prompt):
     if not api_key:
         return "Error: No hay API Key configurada."
     try:
         genai.configure(api_key=api_key)
+        # USAMOS EL MODELO QUE VIMOS QUE FUNCIONA
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt)
         return response.text
@@ -73,16 +64,18 @@ with tab2:
     chat_texto = st.text_area("Pegá el chat aquí:", height=200)
     
     if st.button("✨ Analizar Verdad"):
-        if clave_ingresada == "soberana2026": # LA CONTRASEÑA VIP
+        if clave_ingresada == "soberana2026":
             if chat_texto:
                 with st.spinner("La IA está leyendo entre líneas..."):
                     prompt = f"""
-                    Actúa como una experta en psicología vincular. 
+                    Actúa como una experta en psicología vincular y comportamiento humano. 
                     Analiza este chat de WhatsApp: "{chat_texto}".
-                    1. ¿Qué patrón muestra él?
-                    2. ¿Qué siente ella (la usuaria) y por qué?
-                    3. Traducción de Nitidez: ¿Qué quiso decir realmente?
-                    4. Consejo Soberano: ¿Qué debe hacer ella? (Acción concreta).
+                    
+                    RESPONDÉ CON ESTA ESTRUCTURA:
+                    1. 🚩 **El Patrón Oculto:** (¿Qué está haciendo él realmente? ¿Love bombing, breadcrumbing, negging?).
+                    2. 🧠 **Análisis Psicológico:** (¿Por qué actúa así? Miedos, ego, apego).
+                    3. 👁️ **Traducción Nítida:** (Lo que dice vs. Lo que realmente significa).
+                    4. 👑 **Consejo Soberano:** (Acción concreta y digna para ella. Sin juegos, límites claros).
                     """
                     resultado = consultar_ia(prompt)
                     st.markdown(resultado)
@@ -99,11 +92,11 @@ with tab3:
     if st.button("🔮 Diagnosticar Encuentro"):
         if clave_ingresada == "soberana2026":
             if relato:
-                with st.spinner("Analizando micro-gestos y conductas..."):
+                with st.spinner("Analizando micro-gestos..."):
                     prompt = f"""
                     Analiza esta cita: "{relato}".
-                    Dime si hay 'Red Flags' (banderas rojas) o 'Green Flags'.
-                    ¿Vale la pena una segunda cita? Sé brutalmente honesta.
+                    Detectá Red Flags (peligros) y Green Flags (señales sanas).
+                    ¿Vale la pena una segunda cita? Sé brutalmente honesta y protegé la autoestima de la mujer.
                     """
                     resultado = consultar_ia(prompt)
                     st.markdown(resultado)
