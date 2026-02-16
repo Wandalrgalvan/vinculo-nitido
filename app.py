@@ -5,7 +5,7 @@ import json
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="🦋", layout="centered")
 
-# --- ESTILO VISUAL MÍSTICO (CSS) ---
+# --- ESTILO VISUAL MÍSTICO (CSS MEJORADO PARA CENTRADO) ---
 st.markdown("""
     <style>
     /* 1. Fondo Degradado Místico */
@@ -15,24 +15,27 @@ st.markdown("""
         color: #FFFFFF;
     }
 
-    /* 2. Barra Lateral CENTRADA */
+    /* 2. Barra Lateral FUERTE CENTRADO */
     section[data-testid="stSidebar"] {
         background-color: #1A0525;
         text-align: center;
     }
-    section[data-testid="stSidebar"] .block-container {
-        text-align: center;
+    
+    /* ESTE ES EL TRUCO NUEVO PARA CENTRAR LA IMAGEN SÍ O SÍ */
+    [data-testid="stSidebar"] > div:first-child {
+        display: flex;
+        flex-direction: column;
         align-items: center;
+        text-align: center;
     }
-    /* Estilo de la Imagen de Perfil */
+
+    /* Estilo de la Imagen de Perfil (Silueta) */
     section[data-testid="stSidebar"] img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
         border-radius: 50%;
         border: 3px solid #D4AF37;
         box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-        object-fit: cover; /* Asegura que la foto no se deforme */
+        object-fit: cover;
+        margin-bottom: 20px; /* Un poco de aire abajo de la foto */
     }
 
     /* 3. Botones Dorados */
@@ -53,18 +56,11 @@ st.markdown("""
     }
 
     /* 4. Cajas de Texto (Gris Claro) */
-    .stTextArea>div>div>textarea {
-        background-color: #F5F5F5;
-        color: #000000;
-        border: 2px solid #D4AF37;
-        border-radius: 12px;
-    }
-    
-    /* Inputs de contraseña */
-    .stTextInput>div>div>input {
-        background-color: #F5F5F5;
-        color: black;
-        border-radius: 10px;
+    .stTextArea>div>div>textarea, .stTextInput>div>div>input {
+        background-color: #F5F5F5 !important;
+        color: #000000 !important;
+        border: 2px solid #D4AF37 !important;
+        border-radius: 12px !important;
     }
 
     /* 5. Títulos */
@@ -84,8 +80,8 @@ st.markdown("""
 
 # --- BARRA LATERAL ---
 with st.sidebar:
-    # IMAGEN ARREGLADA (Usamos Unsplash que es más estable)
-    st.image("https://images.unsplash.com/photo-1542206395-9feb3edaa68d?q=80&w=300&auto=format&fit=crop", width=180) 
+    # NUEVA IMAGEN DE SILUETA (Unsplash)
+    st.image("https://images.unsplash.com/photo-1494972308805-463bc619d34e?q=80&w=300&auto=format&fit=crop", width=160) 
     
     st.markdown("<h2 style='text-align: center; color: #D4AF37;'>Zona Soberana</h2>", unsafe_allow_html=True)
     st.write("---")
