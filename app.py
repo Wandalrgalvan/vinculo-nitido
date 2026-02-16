@@ -5,46 +5,43 @@ import json
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="🦋", layout="centered")
 
-# --- ESTILO VISUAL MÍSTICO (CSS MEJORADO) ---
+# --- ESTILO VISUAL MÍSTICO (CSS) ---
 st.markdown("""
     <style>
-    /* 1. Fondo Degradado Místico (Violeta Mágico) 
-       Ya no es negro oscuro, es un degradado vibrante pero elegante */
+    /* 1. Fondo Degradado Místico */
     .stApp {
         background: rgb(45,0,70);
         background: linear-gradient(160deg, rgba(45,0,70,1) 0%, rgba(20,0,40,1) 50%, rgba(0,0,20,1) 100%);
         color: #FFFFFF;
     }
 
-    /* 2. Barra Lateral CENTRADA y con estilo */
+    /* 2. Barra Lateral CENTRADA */
     section[data-testid="stSidebar"] {
-        background-color: #1A0525; /* Violeta muy oscuro */
+        background-color: #1A0525;
         text-align: center;
     }
-    
-    /* Truco para centrar la imagen y los títulos en la barra */
     section[data-testid="stSidebar"] .block-container {
         text-align: center;
         align-items: center;
     }
-    
+    /* Estilo de la Imagen de Perfil */
     section[data-testid="stSidebar"] img {
         display: block;
         margin-left: auto;
         margin-right: auto;
         border-radius: 50%;
-        border: 3px solid #D4AF37; /* Borde dorado */
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); /* Resplandor */
+        border: 3px solid #D4AF37;
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        object-fit: cover; /* Asegura que la foto no se deforme */
     }
 
-    /* 3. Botones Dorados de Alto Valor */
+    /* 3. Botones Dorados */
     .stButton>button {
         background: linear-gradient(90deg, #D4AF37 0%, #FDC830 100%);
         color: #000000;
         border: none;
         border-radius: 25px;
         font-weight: bold;
-        font-size: 16px;
         padding: 12px 24px;
         box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
         width: 100%;
@@ -55,13 +52,12 @@ st.markdown("""
         box-shadow: 0px 6px 20px rgba(212, 175, 55, 0.6);
     }
 
-    /* 4. CAJAS DE TEXTO (Ahora GRIS CLARO para leer mejor) */
+    /* 4. Cajas de Texto (Gris Claro) */
     .stTextArea>div>div>textarea {
-        background-color: #F5F5F5; /* Gris muy clarito, casi blanco */
-        color: #000000; /* Letra negra */
+        background-color: #F5F5F5;
+        color: #000000;
         border: 2px solid #D4AF37;
         border-radius: 12px;
-        font-family: sans-serif;
     }
     
     /* Inputs de contraseña */
@@ -71,7 +67,7 @@ st.markdown("""
         border-radius: 10px;
     }
 
-    /* 5. Títulos y Textos */
+    /* 5. Títulos */
     h1 {
         text-align: center;
         color: #D4AF37 !important;
@@ -80,20 +76,16 @@ st.markdown("""
     }
     h3 {
         text-align: center;
-        color: #E6E6FA !important; /* Lavanda */
+        color: #E6E6FA !important;
         font-style: italic;
-    }
-    p, li {
-        font-size: 1.1rem;
-        line-height: 1.6;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- BARRA LATERAL ---
 with st.sidebar:
-    # Imagen de silueta mística
-    st.image("https://cdn.pixabay.com/photo/2019/04/06/00/39/woman-4106373_1280.jpg", width=160) 
+    # IMAGEN ARREGLADA (Usamos Unsplash que es más estable)
+    st.image("https://images.unsplash.com/photo-1542206395-9feb3edaa68d?q=80&w=300&auto=format&fit=crop", width=180) 
     
     st.markdown("<h2 style='text-align: center; color: #D4AF37;'>Zona Soberana</h2>", unsafe_allow_html=True)
     st.write("---")
@@ -108,7 +100,7 @@ with st.sidebar:
         st.error("⚠️ Falta API Key")
         api_key = ""
 
-# --- MOTOR DE INTELIGENCIA (AUTO-DETECT) ---
+# --- MOTOR IA (AUTO-DETECT) ---
 def obtener_modelo_valido(api_key):
     url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
     try:
@@ -149,10 +141,9 @@ st.markdown("### *Decodificando la mente masculina con ciencia*")
 
 st.write("") 
 
-# AHORA SON 3 PESTAÑAS
 tab1, tab2, tab3 = st.tabs(["🧠 Perfil Rápido", "🔬 Analizar Chat (VIP)", "👑 Consejera Real"])
 
-# --- PESTAÑA 1: PERFIL ---
+# --- PESTAÑA 1 ---
 with tab1:
     st.info("Diagnóstico preliminar de conducta:")
     perfil = st.radio("¿Qué patrón repite él hoy?", 
@@ -166,10 +157,10 @@ with tab1:
         st.success(f"Patrón detectado: **{perfil}**.")
         st.markdown("⚠️ **Alerta:** Este comportamiento altera tu química cerebral (Cortisol/Dopamina). Pasate a la pestaña VIP para romper el ciclo.")
 
-# --- PESTAÑA 2: ANALIZAR CHAT ---
+# --- PESTAÑA 2 ---
 with tab2:
     st.write("Pegá la conversación. Vamos a aplicar neurociencia afectiva.")
-    chat_texto = st.text_area("Chat de WhatsApp:", height=200, placeholder="Pega aquí el texto... (Tus datos son privados)")
+    chat_texto = st.text_area("Chat de WhatsApp:", height=200, placeholder="Pega aquí el texto...")
     
     st.write("")
     if st.button("✨ DECODIFICAR MENTE MASCULINA"):
@@ -208,27 +199,27 @@ with tab2:
         else:
             st.error("⛔ Clave incorrecta.")
 
-# --- PESTAÑA 3: CONSEJERA REAL (NUEVA) ---
+# --- PESTAÑA 3 ---
 with tab3:
     st.write("¿Qué te pasa por la mente? Desahogate o pedí un consejo puntual.")
-    consulta = st.text_area("Escribí acá tu situación o cómo te sentís:", height=150, placeholder="Ej: Me siento ansiosa porque no escribe, quiero escribirle...")
+    consulta = st.text_area("Escribí acá tu situación o cómo te sentís:", height=150, placeholder="Ej: Me siento ansiosa porque no escribe...")
     
     if st.button("💡 PEDIR CONSEJO SOBERANO"):
         if clave_ingresada == "soberana2026":
             if consulta:
                 with st.spinner("Conectando con tu mejor versión..."):
                     prompt = f"""
-                    Actúa como una Consejera de Alto Valor y Mentora de Vida.
+                    Actúa como una Consejera de Alto Valor y Mentora de Vida (estilo Wanda Soberana).
                     La usuaria te cuenta esto: "{consulta}".
                     
                     No la juzgues. Valida sus emociones pero sacúdela con la verdad.
                     Dale una estrategia de dignidad.
                     Recuérdale quién es ella.
-                    Tono: Amoroso pero firme. Como una hermana mayor sabia.
+                    Tono: Amoroso pero firme. Como una hermana mayor sabia y poderosa.
                     """
                     resultado = consultar_ia_auto(prompt)
                     st.markdown(resultado)
             else:
-                st.warning("Escribí algo para aconsejarte.")
+                st.warning("Escribí algo.")
         else:
             st.error("⛔ Clave incorrecta.")
