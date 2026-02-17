@@ -4,55 +4,47 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-# --- 1. CONFIGURACIÓN (TÍTULO Y DISEÑO) ---
+# --- CONFIGURACIÓN ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="🦋", layout="centered")
 
-# --- 2. ESTILO VISUAL MÍSTICO Y "MOBILE FIRST" ---
+# --- ESTILO VISUAL MÍSTICO ---
 st.markdown("""
     <style>
-    /* Fondo Degradado Místico */
+    /* Fondo */
     .stApp {
         background: rgb(45,0,70);
         background: linear-gradient(160deg, rgba(45,0,70,1) 0%, rgba(20,0,40,1) 50%, rgba(0,0,20,1) 100%);
         color: #FFFFFF;
     }
     
-    /* Cajas de Texto (Más parecidas a WhatsApp) */
-    .stTextArea>div>div>textarea {
-        background-color: #F0F2F6 !important;
-        color: #111 !important;
-        border-radius: 15px !important;
-        border: 2px solid #D4AF37 !important;
-    }
-    
-    /* Botones Dorados (Llamado a la acción) */
+    /* Barra Lateral */
+    section[data-testid="stSidebar"] { background-color: #1A0525; }
+    [data-testid="stSidebar"] > div:first-child { text-align: center; }
+
+    /* Botones Dorados */
     .stButton>button {
         background: linear-gradient(90deg, #D4AF37 0%, #FDC830 100%);
-        color: black;
-        font-weight: bold;
-        border-radius: 25px;
-        border: none;
-        width: 100%;
-        padding: 15px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        color: black; font-weight: bold; border-radius: 25px; border: none; width: 100%;
+        text-transform: uppercase; margin-top: 10px;
     }
-    .stButton>button:hover { transform: scale(1.02); }
-
-    /* Efecto de "Censura" para el modo gratis */
+    
+    /* Inputs */
+    .stTextArea>div>div>textarea, .stTextInput>div>div>input {
+        background-color: #F0F2F6 !important; color: black !important; border-radius: 10px;
+    }
+    
+    /* Efecto Borroso (Censura) */
     .blur-text {
-        color: transparent;
-        text-shadow: 0 0 8px rgba(255,255,255,0.5);
-        user-select: none;
+        color: transparent; text-shadow: 0 0 10px rgba(255,255,255,0.7); user-select: none;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. CONEXIÓN A GOOGLE SHEETS (BASE DE DATOS) ---
+# --- CONEXIÓN A BASE DE DATOS ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 def gestionar_usuario(clave):
-    """Sistema de Auto-Login: Busca o Crea usuario en el Excel"""
+    """Busca o Crea usuario automáticamente."""
     try:
         df = conn.read(worksheet="vinculo_db", ttl=0)
         df['usuario'] = df['usuario'].astype(str)
@@ -61,203 +53,236 @@ def gestionar_usuario(clave):
         if not usuario.empty:
             return usuario.iloc[0].to_dict()
         else:
-            # Si la clave es válida (la que vos vendiste), creamos el perfil
+            # CREAR USUARIO NUEVO
             nuevo = {
                 "usuario": clave, "nombre_el": "", "edad": 0, 
                 "historia": "No especificado", "apego": "No especificado", "resumen_sesiones": ""
             }
-            # Guardamos en Excel
             df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
             conn.update(worksheet="vinculo_db", data=df)
             return nuevo
     except: return None
 
 def guardar_historial(usuario_dict, nuevo_resumen):
-    """Guarda el resumen de la sesión en el Excel"""
+    """Guarda memoria en el Excel."""
     try:
         df = conn.read(worksheet="vinculo_db", ttl=0)
         df['usuario'] = df['usuario'].astype(str)
         idx = df[df['usuario'] == str(usuario_dict['usuario'])].index[0]
-        
-        # Concatenamos el historial nuevo con el viejo
         historial_viejo = str(usuario_dict.get('resumen_sesiones', ''))
-        df.at[idx, 'resumen_sesiones'] = f"{nuevo_resumen} | {historial_viejo}"[:5000] # Límite de caracteres
-        
+        df.at[idx, 'resumen_sesiones'] = f"{nuevo_resumen} | {historial_viejo}"[:4000]
         conn.update(worksheet="vinculo_db", data=df)
     except: pass
 
-# --- 4. CEREBRO IA (CON PROMPT DE LA SOBERANA) ---
+def actualizar_perfil(datos):
+    """Actualiza datos del sujeto."""
+    try:
+        df = conn.read(worksheet="vinculo_db", ttl=0)
+        df['usuario'] = df['usuario'].astype(str)
+        idx = df[df['usuario'] == str(datos['usuario'])].index[0]
+        for k, v in datos.items(): df.at[idx, k] = v
+        conn.update(worksheet="vinculo_db", data=df)
+        return True
+    except: return False
+
+# --- MOTOR IA (EL AUTO-DETECT QUE ARREGLA ERRORES) ---
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
 else:
     api_key = ""
 
+def obtener_modelo_valido(api_key):
+    """Busca qué modelo funciona realmente."""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            datos = response.json()
+            for modelo in datos.get('models', []):
+                if 'generateContent' in modelo.get('supportedGenerationMethods', []):
+                    if 'gemini' in modelo['name']: return modelo['name']
+            return "models/gemini-pro"
+        return None
+    except: return None
+
 def consultar_ia(prompt):
-    if not api_key: return "Error: Falta API Key"
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    if not api_key: return "Error: Falta API Key."
+    modelo = obtener_modelo_valido(api_key)
+    if not modelo: return "Error de conexión con Google AI."
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/{modelo}:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {"contents": [{"parts": [{"text": prompt}]}]}
     try:
         res = requests.post(url, headers=headers, json=data)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
-        return "Error en la IA. Intenta de nuevo."
-    except: return "Error de conexión."
+        return f"Error ({res.status_code}): Intenta de nuevo."
+    except Exception as e: return f"Error: {str(e)}"
 
-# --- 5. LÓGICA DE SESIÓN ---
+# --- ESTADO DE SESIÓN ---
 if 'vip_user' not in st.session_state:
     st.session_state.vip_user = None
 
-# --- 6. BARRA LATERAL (EL ACCESO) ---
+# --- BARRA LATERAL ---
 with st.sidebar:
-    st.markdown("<h1 style='text-align: center;'>🦋</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; margin:0;'>🦋</h1>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center; color: #D4AF37;'>Zona Soberana</h3>", unsafe_allow_html=True)
     st.write("---")
 
     if st.session_state.vip_user is None:
-        st.info("💎 ¿Tenés tu Pase VIP?")
-        clave = st.text_input("Ingresá tu Clave de Acceso:", type="password")
+        st.info("🔐 **ACCESO VIP**")
+        clave = st.text_input("Ingresá tu Clave:", type="password", help="Si compraste el pase, usá la clave que recibiste.")
         if st.button("INGRESAR"):
             if clave:
-                user = gestionar_usuario(clave)
-                if user:
-                    st.session_state.vip_user = user
-                    st.rerun()
-                else:
-                    st.error("Clave incorrecta. Revisá tu mail de compra.")
+                with st.spinner("Verificando..."):
+                    user = gestionar_usuario(clave)
+                    if user:
+                        st.session_state.vip_user = user
+                        st.rerun()
+                    else:
+                        st.error("Error de conexión.")
         
         st.write("---")
-        st.markdown("### ¿No tenés clave?")
-        st.write("Dormí tranquila hoy. Obtené respuestas inmediatas.")
-        # LINK DE PAGO REAL (Automatización)
-        st.link_button("👉 OBTENER ACCESO YA", "https://link.mercadopago.com.ar/tu_link_aca")
+        st.caption("¿Solo mirando?")
+        st.write("Usá las pestañas gratuitas de la derecha 👉")
+        st.link_button("💎 Comprar Pase VIP", "https://mercadopago.com.ar")
 
     else:
         # USUARIA LOGUEADA
         vip = st.session_state.vip_user
         st.success(f"Hola, Soberana.")
         
-        # PERFIL DEL SUJETO (Simplificado)
-        with st.expander("⚙️ Configurar a ÉL", expanded=True):
+        with st.expander("⚙️ Perfil de ÉL (Datos Clave)", expanded=True):
             with st.form("perfil"):
                 nombre = st.text_input("Nombre:", value=vip['nombre_el'])
                 edad = st.number_input("Edad:", value=int(vip['edad']) if vip['edad'] else 0)
-                historia = st.selectbox("Historia:", ["Normal", "Padres Divorciados", "Padre Ausente", "Violencia/Adicciones", "Narcisismo"], index=0)
-                if st.form_submit_button("Guardar Perfil"):
-                    # Aquí iría la lógica de guardar perfil completo (simplificado para el ejemplo)
-                    st.toast("Perfil actualizado")
+                historia = st.selectbox("Historia:", ["No especificado", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
+                apego = st.selectbox("Apego:", ["No especificado", "Evitativo", "Ansioso", "Seguro"], index=0)
+                
+                if st.form_submit_button("💾 Guardar Datos"):
+                    vip['nombre_el'] = nombre
+                    vip['edad'] = edad
+                    vip['historia'] = historia
+                    vip['apego'] = apego
+                    if actualizar_perfil(vip):
+                        st.session_state.vip_user = vip
+                        st.toast("Perfil Actualizado")
+                        st.rerun()
 
         if st.button("Cerrar Sesión"):
             st.session_state.vip_user = None
             st.rerun()
 
-# --- 7. PANTALLA PRINCIPAL ---
+# --- PANTALLA PRINCIPAL ---
 st.title("💎 Vínculo Nítido")
 
-# PESTAÑAS ESTRATÉGICAS
-tab_free, tab_vip, tab_help = st.tabs(["🎁 Prueba Gratis", "🔥 Análisis VIP", "🆘 Consejera"])
+# PESTAÑAS (Las gratuitas primero)
+tab_apego, tab_detector, tab_vip = st.tabs(["🎁 Test Apego (Gratis)", "🕵️‍♀️ Detector (Gratis)", "🔥 VIP Total"])
 
-# --- PESTAÑA 1: EL GANCHO (Diagnóstico Gratis, Solución Paga) ---
-with tab_free:
-    st.subheader("¿Qué te dijo él?")
-    st.write("Pegá ese mensaje que te tiene dando vueltas. Te diré qué significa, pero la estrategia es VIP.")
+# --- TAB 1: TEST DE APEGO (GRATIS Y RÁPIDO) ---
+with tab_apego:
+    st.header("Descubrí su Estilo de Apego")
+    st.write("Respondé rápido para identificar su patrón:")
     
-    chat_free = st.text_area("Pegá el mensaje acá:", height=100, placeholder="Ej: 'No sos vos, soy yo...'")
+    p1 = st.radio("1. Cuando hay mucha intimidad emocional, él:", 
+                  ["Se aleja, se enfría o pide 'espacio'", 
+                   "Se pone intenso y necesita validación constante", 
+                   "Se mantiene tranquilo y comunica lo que siente"])
+    
+    p2 = st.radio("2. Ante un conflicto o reclamo tuyo:", 
+                  ["Evita el tema, se va o te aplica la Ley del Hielo", 
+                   "Explota, te culpa y da vuelta la tortilla", 
+                   "Escucha e intenta buscar una solución"])
+    
+    if st.button("VER DIAGNÓSTICO DE APEGO"):
+        st.divider()
+        if "aleja" in p1 or "Evita" in p2:
+            st.error("🚨 **Resultado: APEGO EVITATIVO**")
+            st.write("Su sistema nervioso interpreta la intimidad como una pérdida de libertad. No es que no te quiera, es que tiene **miedo**. Su estrategia es desactivarse para regularse.")
+        elif "intenso" in p1 or "Explota" in p2:
+            st.warning("🥺 **Resultado: APEGO ANSIOSO / REACTIVO**")
+            st.write("Tiene terror al abandono. Sus reacciones exageradas son intentos (mal adaptados) de reconectar con vos.")
+        else:
+            st.success("✅ **Resultado: APEGO SEGURO**")
+            st.write("Parece tener herramientas emocionales sanas. Si sentís inseguridad, revisá tus propios patrones.")
+            
+        st.info("💡 **¿Querés saber qué hacer con este diagnóstico?** Pasate a la pestaña VIP para la estrategia.")
+
+# --- TAB 2: DETECTOR DE MENTIRAS (GANCHO DE VENTA) ---
+with tab_detector:
+    st.subheader("¿Te mandó un mensaje confuso?")
+    st.write("Pegalo acá. La IA te dirá la verdad, pero la estrategia es para las VIP.")
+    
+    msg = st.text_area("Pegá el mensaje:", height=100, placeholder="Ej: No sos vos, soy yo...")
     
     if st.button("🔍 ANALIZAR VERDAD"):
-        if chat_free:
-            with st.spinner("Analizando micro-expresiones y patrones..."):
-                # PROMPT GANCHO
-                prompt = f"""
-                Actúa como Wanda Soberana. Analiza este mensaje: "{chat_free}".
-                1. Dime qué significa realmente (Traducción cruda).
-                2. Dime qué patrón psicológico es (Gaslighting, Breadcrumbing, etc).
-                3. NO DES NINGÚN CONSEJO. Solo el diagnóstico doloroso.
-                """
-                resultado = consultar_ia(prompt)
+        if msg:
+            with st.spinner("Analizando..."):
+                prompt = f"Analiza este mensaje: '{msg}'. Dime qué significa realmente y si es manipulación. NO DES CONSEJOS."
+                res = consultar_ia(prompt)
                 
-                st.markdown(f"### 👁️ La Realidad:")
-                st.write(resultado)
+                st.markdown(f"### 👁️ La Verdad Cruda:")
+                st.write(res)
                 
                 st.divider()
-                st.markdown("### 👑 Estrategia Soberana (Bloqueada)")
+                st.markdown("### 👑 Estrategia Soberana (Bloqueado)")
                 st.markdown("""
                 <div class="blur-text">
-                Para responder esto con dignidad y recuperar tu poder, deberías aplicar la técnica del espejo invertido. 
-                No le contestes inmediatamente. Espera 4 horas y dile exactamente lo siguiente: 
-                "Entiendo perfectamente..."
+                Para responder a esto con dignidad, debes aplicar el silencio estratégico por 12 horas. 
+                Luego responde: "Entiendo que necesites espacio..."
                 </div>
                 """, unsafe_allow_html=True)
                 
-                st.warning("🔒 **¿Querés leer la estrategia y saber qué responder?**")
-                st.write("No cometas el error de responder desde la ansiedad.")
-                st.link_button("💎 DESBLOQUEAR RESPUESTA AHORA", "https://link.mercadopago.com.ar/tu_link_aca")
+                st.warning("🔒 **Para ver la respuesta exacta, ingresá tu Clave VIP.**")
 
-# --- PESTAÑA 2: VIP (FULL POWER) ---
+# --- TAB 3: ZONA VIP (FULL) ---
 with tab_vip:
     if st.session_state.vip_user is None:
-        st.info("🔒 Ingresá tu clave en la barra lateral para acceder al Laboratorio.")
+        st.info("🔒 **Zona Restringida**")
+        st.write("Ingresá tu clave en la barra lateral (izquierda) para desbloquear:")
+        st.markdown("- 🧬 Análisis con Neurociencia")
+        st.markdown("- 🧠 Memoria del Vínculo")
+        st.markdown("- 👑 Consejera Personal")
         st.stop()
     
+    # SI TIENE CLAVE:
     vip = st.session_state.vip_user
-    st.markdown(f"### 🔬 Laboratorio: Analizando a {vip.get('nombre_el', 'Sujeto')}")
+    st.success(f"🔓 **Laboratorio Abierto:** Analizando a {vip.get('nombre_el', 'Sujeto')}")
     
-    chat_vip = st.text_area("Pegá la conversación COMPLETA:", height=200)
+    modo = st.radio("Herramienta:", ["🔬 Análisis de Chat", "👑 Consejera Real"], horizontal=True)
     
-    if st.button("✨ DECODIFICAR CON CIENCIA"):
-        if chat_vip:
-            historial = vip.get('resumen_sesiones', '')
-            with st.spinner("Consultando base de datos de Neurociencia y Trauma..."):
+    if modo == "🔬 Análisis de Chat":
+        chat_vip = st.text_area("Pegá la conversación completa:", height=200)
+        if st.button("✨ DECODIFICAR CON CIENCIA"):
+            if chat_vip:
+                historial = vip.get('resumen_sesiones', '')
+                prompt = f"""
+                Actúa como Wanda Soberana (Experta en Neurociencia y Relaciones).
+                SUJETO: {vip['nombre_el']}, {vip['edad']} años, {vip['historia']}, {vip['apego']}.
+                HISTORIAL: {historial}
+                CHAT: "{chat_vip}"
                 
-                # --- EL PROMPT MAESTRO DE LA SOBERANA (RECUPERADO) ---
-                prompt_maestro = f"""
-                Actúa como 'Wanda Soberana': Experta en Neurociencia Afectiva, Psicología Evolutiva y Relaciones de Alto Valor.
+                Analiza:
+                1. 🧬 **Diagnóstico Nervioso:** (Dopamina/Cortisol/Apego).
+                2. 🦁 **Estrategia Evolutiva:** (¿Cazador o Recolector?).
+                3. 👁️ **Traducción Real.**
+                4. 👑 **Estrategia Soberana:** (Qué responder exactamente).
                 
-                DATOS DEL SUJETO:
-                - Edad: {vip.get('edad')}
-                - Historia/Trauma: {vip.get('historia')}
-                - Historial Previo del Vínculo: {historial}
-                
-                CHAT A ANALIZAR: "{chat_vip}"
-                
-                Analiza PROFUNDAMENTE en 4 pasos:
-                
-                1. 🧬 **BIOLOGÍA Y NEUROCIENCIA:**
-                   - ¿Qué cóctel químico busca él? (Dopamina rápida, validación).
-                   - ¿Qué está activando en ELLA? (Adicción al refuerzo intermitente, Cortisol).
-                   
-                2. 🦁 **PSICOLOGÍA EVOLUTIVA & APEGO:**
-                   - Diagnóstico de Apego (Evitativo, Ansioso, Desorganizado).
-                   - Estrategia reproductiva: ¿Cazador (Inversión) o Recolector (Oportunista)?
-                   
-                3. 👁️ **TRADUCCIÓN NÍTIDA:**
-                   - Lo que dice: "..."
-                   - Lo que realmente piensa: "..." (Sé cruda).
-                   
-                4. 👑 **ESTRATEGIA SOBERANA (ACCIONABLE):**
-                   - Exactamente qué responder (Copy-Paste).
-                   - O si debe aplicar Contacto Cero.
-                   - Cómo recuperar el marco de poder.
-                
-                AL FINAL, escribe: "MEMORIA_DB: [Resumen de 1 linea de lo que pasó hoy para guardar en el excel]"
+                AL FINAL escribe: "MEMORIA_DB: [Resumen de 1 linea]"
                 """
+                res = consultar_ia(prompt)
                 
-                respuesta = consultar_ia(prompt_maestro)
-                
-                # Lógica para mostrar respuesta y guardar memoria
-                if "MEMORIA_DB:" in respuesta:
-                    partes = respuesta.split("MEMORIA_DB:")
-                    texto_visible = partes[0]
-                    memoria_nueva = partes[1].strip()
-                    
-                    st.markdown(texto_visible)
-                    
-                    # Guardamos automáticamente en segundo plano
-                    guardar_historial(vip, f"{datetime.now().strftime('%d/%m')}: {memoria_nueva}")
-                    st.toast("🧠 Memoria del vínculo actualizada en tu expediente.")
+                if "MEMORIA_DB:" in res:
+                    parts = res.split("MEMORIA_DB:")
+                    st.markdown(parts[0])
+                    guardar_historial(vip, f"{datetime.now().strftime('%d/%m')}: {parts[1].strip()}")
                 else:
-                    st.markdown(respuesta)
-
-# --- PESTAÑA 3: CONSEJERA ---
-with tab_vip: # Reutilizamos lógica VIP
-    pass # Ya está en las tabs de arriba, solo agregamos contenido aquí si queremos separar
+                    st.markdown(res)
+                    
+    elif modo == "👑 Consejera Real":
+        consulta = st.text_area("¿Qué sentís hoy?")
+        if st.button("PEDIR ESTRATEGIA"):
+            if consulta:
+                prompt = f"Consejera experta. Usuaria: {vip['nombre_el']} ({vip['historia']}). Problema: {consulta}. Dame consejo empoderador."
+                st.markdown(consultar_ia(prompt))
