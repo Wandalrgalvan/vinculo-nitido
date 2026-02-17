@@ -179,4 +179,96 @@ with st.sidebar:
             list_apego = ["Seleccionar...", "Evitativo (Se aleja)", "Ansioso (Persigue)", "Seguro", "Desorganizado"]
             
             # Indices seguros
-            idx_hist = list_hist.index(hist_prev) if hist_prev
+            idx_hist = list_hist.index(hist_prev) if hist_prev in list_hist else 0
+            idx_apego = list_apego.index(apego_prev) if apego_prev in list_apego else 0
+            
+            historia = st.selectbox("Trauma / Historia:", list_hist, index=idx_hist)
+            apego = st.selectbox("Estilo de Apego:", list_apego, index=idx_apego)
+            
+            if st.form_submit_button("💾 Actualizar Expediente"):
+                nuevos_datos = {
+                    "usuario": vip['usuario'],
+                    "nombre_el": nombre_el,
+                    "edad": edad_el,
+                    "historia": historia,
+                    "apego": apego,
+                    "resumen_sesiones": vip.get('resumen_sesiones', '')
+                }
+                if guardar_datos(nuevos_datos):
+                    st.session_state.usuario_vip = nuevos_datos
+                    st.toast("Datos actualizados.")
+                    st.rerun()
+        
+        if st.button("Cerrar Sesión"):
+            st.session_state.usuario_vip = None
+            st.rerun()
+
+# --- 7. INTERFAZ PRINCIPAL ---
+st.title("💎 Vínculo Nítido")
+
+# LÓGICA: VIP vs GRATIS
+if st.session_state.usuario_vip:
+    # --- MODO VIP (FULL CIENCIA) ---
+    vip = st.session_state.usuario_vip
+    
+    # Validar si faltan datos
+    if not vip.get('nombre_el') or vip.get('edad') == 0:
+        st.warning("⚠️ **Falta completar el expediente.** Por favor, llená los datos de él en la barra lateral para que el análisis sea preciso.")
+    else:
+        st.markdown(f"### Analizando a: **{vip['nombre_el']} ({vip['edad']} años)**")
+        
+        tab1, tab2 = st.tabs(["🔬 Laboratorio (Neurociencia)", "👑 Consejera Real"])
+        
+        with tab1:
+            st.write("Pegá la conversación. La IA buscará patrones biológicos y de apego.")
+            chat = st.text_area("Chat:", height=200)
+            
+            if st.button("✨ DECODIFICAR CON CIENCIA"):
+                if chat:
+                    with st.spinner("Analizando dopamina, cortisol y patrones evolutivos..."):
+                        # EL PROMPT CIENTÍFICO QUE TE GUSTABA
+                        prompt = f"""
+                        Actúa como 'Wanda Soberana': experta en Neurociencia Afectiva, Psicología Evolutiva y Trauma.
+                        
+                        SUJETO: {vip['nombre_el']}, {vip['edad']} años.
+                        HISTORIA: {vip['historia']}. APEGO: {vip['apego']}.
+                        CHAT: "{chat}"
+                        
+                        Dame un análisis DURO y CIENTÍFICO en 4 bloques:
+                        1. 🧬 **DIAGNÓSTICO NERVIOSO:** (¿Qué activa en ella? ¿Dopamina/Cortisol? ¿Qué apego muestra él?).
+                        2. 🦁 **PSICOLOGÍA EVOLUTIVA:** (¿Estrategia de corto o largo plazo? ¿Cazador o Recolector?).
+                        3. 👁️ **TRADUCCIÓN NÍTIDA:** (Lo que dice vs Lo que significa).
+                        4. 👑 **ESTRATEGIA SOBERANA:** (Consejo de alto valor).
+                        """
+                        st.markdown(consultar_ia(prompt))
+
+        with tab2:
+            st.write("Desahogate. Tu mentora te escucha.")
+            consulta = st.text_area("¿Qué sentís?")
+            
+            if st.button("PEDIR ESTRATEGIA"):
+                if consulta:
+                    prompt = f"""
+                    Mentora de Alto Valor. Usuaria lidiando con {vip['nombre_el']} ({vip['historia']}).
+                    Consulta: "{consulta}".
+                    Dame consejo estratégico y empoderador.
+                    """
+                    st.markdown(consultar_ia(prompt))
+
+else:
+    # --- MODO GRATIS (DEMO) ---
+    st.markdown("### 👋 Test de Verdad (Gratuito)")
+    st.write("Probá la IA con **un mensaje**. Para análisis profundos, ingresá tu clave.")
+    
+    if not st.session_state.trial_usado:
+        msg = st.text_area("Mensaje confuso de él:", height=100)
+        if st.button("🔍 ANALIZAR AHORA"):
+            if msg:
+                prompt = f"Analiza este mensaje de un hombre: '{msg}'. Sé breve y directa. ¿Miente o dice la verdad?"
+                st.markdown(f"### Resultado:\n{consultar_ia(prompt)}")
+                st.session_state.trial_usado = True
+                st.balloons()
+    else:
+        st.error("🔒 **Prueba finalizada.**")
+        st.info("Para análisis completos con perfil psicológico, adquirí el Pase VIP.")
+        st.link_button("💎 Comprar Acceso", "https://mercadopago.com.ar")
