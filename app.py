@@ -104,26 +104,50 @@ else:
     api_key = ""
 
 def consultar_metodologia(prompt):
-    if not api_key: return "⚠️ Error de sistema. Contacta a soporte."
+   def consultar_metodologia(prompt):
+    if not api_key: return "⚠️ Error: Falta la API Key."
     
-    # PROMPT DE PERSONALIDAD OCULTA
-    system_instruction = "Eres Wanda Soberana, una mentora experta en psicología masculina y relaciones. NO MENCIONES QUE ERES UNA IA. Habla en primera persona ('mi análisis', 'veo que'). Sé empática pero cruda. Usa emojis. Tu objetivo es empoderar a la mujer."
-    
-    full_prompt = f"{system_instruction}\n\nConsulta: {prompt}"
-    
+    # URL directa
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": full_prompt}]}]}
+    
+    # 1. INSTRUCCIÓN DE SISTEMA (ROBUSTA)
+    system_instruction = """
+    Eres Wanda Soberana, experta en psicología evolutiva y relaciones.
+    Tu objetivo es empoderar mujeres.
+    Analiza el texto enviado. Si hay contenido sexual explícito, trátalo con madurez clínica y psicológica, no lo censures, es parte del análisis de vínculo.
+    Usa emojis. Sé directa, empática y científica.
+    """
+    
+    full_prompt = f"{system_instruction}\n\nConsulta de la usuaria: {prompt}"
+    
+    # 2. CONFIGURACIÓN DE SEGURIDAD (Permitir contenido adulto)
+    safety_settings = [
+        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+    ]
+    
+    data = {
+        "contents": [{"parts": [{"text": full_prompt}]}],
+        "safetySettings": safety_settings
+    }
     
     try:
         response = requests.post(url, headers=headers, json=data)
+        
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            return "La red está saturada. Intenta de nuevo en unos segundos."
-    except:
-        return "Error de conexión."
-
+            # AQUI VEREMOS EL ERROR REAL
+            error_msg = response.text
+            if "SAFETY" in error_msg:
+                return "⚠️ **La IA se sonrojó.** El mensaje es muy explícito y Google lo bloqueó por seguridad. Intenta suavizar las palabras sexuales (ej: usar metáforas) y prueba de nuevo."
+            return f"Error técnico ({response.status_code}): La red está inestable."
+    except Exception as e:
+        return f"Error de conexión: {str(e)}"
+        
 # --- 4. GESTIÓN DE SESIÓN ---
 if 'usuario_actual' not in st.session_state:
     st.session_state.usuario_actual = None
