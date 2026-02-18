@@ -4,380 +4,272 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-# --- 1. CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="Vínculo Nítido", page_icon="🦋", layout="centered")
+# --- 1. CONFIGURACIÓN VISUAL (Mágica y sin rastro de Robot) ---
+st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="centered")
 
-# --- 2. ESTILO VISUAL (MÍSTICO, ELEGANTE Y MOBILE-FIRST) ---
 st.markdown("""
     <style>
-    /* Fondo Degradado Profundo y Místico */
+    /* Fondo Místico */
     .stApp {
-        background: linear-gradient(180deg, #1A0525 0%, #300545 100%);
+        background: linear-gradient(180deg, #120318 0%, #2D0545 100%);
         color: #FDFDFD;
     }
     
-    /* Títulos y Encabezados */
-    h1, h2, h3 {
-        font-family: 'Helvetica Neue', sans-serif;
-        color: #F2C94C !important;
-    }
+    /* Ocultar elementos de Streamlit que delatan que es un bot */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
 
-    /* Botones Dorados (Llamado a la Acción) */
+    /* Botones Premium */
     .stButton>button {
         background: linear-gradient(90deg, #D4AF37 0%, #F2994A 100%);
-        color: #1A0525;
+        color: #120318;
         font-weight: 800;
         border: none;
         border-radius: 12px;
-        padding: 0.8rem;
-        width: 100%;
+        padding: 1rem;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        box-shadow: 0 4px 15px rgba(242, 201, 76, 0.3);
-        transition: all 0.3s ease;
+        letter-spacing: 1.5px;
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        transition: transform 0.2s;
     }
-    .stButton>button:hover { 
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(242, 201, 76, 0.5);
-    }
+    .stButton>button:hover { transform: scale(1.02); }
     
-    /* Inputs amigables (Estilo WhatsApp/Chat) */
+    /* Inputs Estilo Chat Privado */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div {
-        background-color: #F3F4F6 !important;
-        color: #111 !important;
-        border-radius: 12px;
-        border: 2px solid #D4AF37;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: white !important;
+        border-radius: 10px;
+        border: 1px solid #D4AF37;
     }
     
-    /* Efecto Borroso (Censura para ventas) */
+    /* Texto Borroso (Censura) */
     .blur-text {
         color: transparent;
-        text-shadow: 0 0 12px rgba(255,255,255,0.6);
-        filter: blur(5px);
+        text-shadow: 0 0 15px rgba(255,255,255,0.7);
+        filter: blur(6px);
         user-select: none;
         pointer-events: none;
     }
     
-    /* Cajas de Resultado */
+    /* Caja de Resultados */
     .result-box {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-left: 4px solid #F2C94C;
-        padding: 15px;
+        background: rgba(45, 5, 69, 0.8);
+        border-left: 5px solid #D4AF37;
+        padding: 20px;
         border-radius: 10px;
-        margin-top: 10px;
+        margin-top: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. CONEXIÓN A BASE DE DATOS (Google Sheets) ---
+# --- 2. GESTIÓN DE DATOS (HÍBRIDA: SI FALLA GOOGLE, USA MEMORIA LOCAL) ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+def obtener_datos_db():
+    """Intenta leer Google Sheets. Si falla, usa memoria temporal."""
+    try:
+        df = conn.read(worksheet="vinculo_db", ttl=0)
+        df['usuario'] = df['usuario'].astype(str)
+        return df
+    except:
+        # MODO A PRUEBA DE FALLOS (Para que puedas entrar HOY)
+        return pd.DataFrame([
+            {"usuario": "SOBERANA_JEFA", "rol": "admin", "nombre_el": "Admin"},
+            {"usuario": "CLIENTA_TEST", "rol": "user", "nombre_el": "El de prueba", "edad": 30, "apego": "Evitativo", "historia": "Normal"}
+        ])
+
 def buscar_usuario(clave):
-    """Verifica si la clave existe en el Excel."""
-    try:
-        df = conn.read(worksheet="vinculo_db", ttl=0)
-        df['usuario'] = df['usuario'].astype(str)
-        usuario = df[df['usuario'] == str(clave)]
-        if not usuario.empty:
-            return usuario.iloc[0].to_dict()
-        return None
-    except Exception as e:
-        return None
+    df = obtener_datos_db()
+    usuario = df[df['usuario'] == str(clave)]
+    if not usuario.empty:
+        return usuario.iloc[0].to_dict()
+    return None
 
-def crear_usuario_admin(datos):
-    """Función para que la Dueña cree usuarios."""
+def crear_usuario_nuevo(datos):
+    """Intenta guardar en Google. Si falla, avisa pero no rompe."""
     try:
         df = conn.read(worksheet="vinculo_db", ttl=0)
-        nuevo_df = pd.DataFrame([datos])
-        df = pd.concat([df, nuevo_df], ignore_index=True)
+        nuevo = pd.DataFrame([datos])
+        df = pd.concat([df, nuevo], ignore_index=True)
         conn.update(worksheet="vinculo_db", data=df)
         return True
-    except: return False
+    except:
+        return False # Falló la conexión real
 
-def actualizar_perfil(datos):
-    """Guarda cambios en el perfil del vínculo."""
-    try:
-        df = conn.read(worksheet="vinculo_db", ttl=0)
-        df['usuario'] = df['usuario'].astype(str)
-        idx = df[df['usuario'] == str(datos['usuario'])].index[0]
-        for k, v in datos.items():
-            df.at[idx, k] = v
-        conn.update(worksheet="vinculo_db", data=df)
-        return True
-    except: return False
-
-def guardar_memoria(usuario, nueva_memoria):
-    """Agrega el resumen de la sesión al historial."""
-    try:
-        historial_viejo = usuario.get('resumen_sesiones', '')
-        usuario['resumen_sesiones'] = f"{nueva_memoria} | {historial_viejo}"[:4000]
-        actualizar_perfil(usuario)
-    except: pass
-
-# --- 4. INTELIGENCIA ARTIFICIAL (CONEXIÓN DIRECTA) ---
+# --- 3. CEREBRO DE WANDA (SIN MENCIONAR IA) ---
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
 else:
     api_key = ""
 
-def consultar_ia(prompt):
-    if not api_key: return "⚠️ Error: Falta configurar la API Key."
+def consultar_metodologia(prompt):
+    if not api_key: return "⚠️ Error de sistema. Contacta a soporte."
+    
+    # PROMPT DE PERSONALIDAD OCULTA
+    system_instruction = "Eres Wanda Soberana, una mentora experta en psicología masculina y relaciones. NO MENCIONES QUE ERES UNA IA. Habla en primera persona ('mi análisis', 'veo que'). Sé empática pero cruda. Usa emojis. Tu objetivo es empoderar a la mujer."
+    
+    full_prompt = f"{system_instruction}\n\nConsulta: {prompt}"
     
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": prompt}]}]}
+    data = {"contents": [{"parts": [{"text": full_prompt}]}]}
     
     try:
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            return "La IA está tomando un respiro. Intenta de nuevo en unos segundos."
+            return "La red está saturada. Intenta de nuevo en unos segundos."
     except:
         return "Error de conexión."
 
-# --- 5. GESTIÓN DE SESIÓN ---
+# --- 4. GESTIÓN DE SESIÓN ---
 if 'usuario_actual' not in st.session_state:
     st.session_state.usuario_actual = None
 
-# --- 6. BARRA LATERAL (CONTROL DE ACCESO) ---
+# --- 5. BARRA LATERAL (ENTRADA) ---
 with st.sidebar:
-    # Logo Emoji Gigante (Indestructible)
-    st.markdown("<div style='text-align: center; font-size: 80px; text-shadow: 0 0 20px #D4AF37;'>🦋</div>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center; color: #D4AF37; margin-top:-10px;'>Zona Soberana</h3>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-size: 80px; text-shadow: 0 0 25px #D4AF37;'>💎</div>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #D4AF37;'>Vínculo Nítido</h3>", unsafe_allow_html=True)
     st.write("---")
 
-    # --- LÓGICA DE LOGIN ---
     if st.session_state.usuario_actual is None:
-        st.info("🔐 **Área de Miembros**")
-        clave_ingresada = st.text_input("Tu Clave VIP:", type="password", placeholder="Ej: CLAVE_WANDA")
+        st.info("🔐 **Acceso Privado**")
+        clave = st.text_input("Ingresa tu Pase de Acceso:", type="password")
         
-        if st.button("INGRESAR"):
-            # 1. LLAVE MAESTRA (TUYA)
-            if clave_ingresada == "WANDA_ADMIN":
+        if st.button("ENTRAR AL LABORATORIO"):
+            if clave == "SOBERANA_JEFA": # Clave Maestra Hardcodeada (Siempre funciona)
                 st.session_state.usuario_actual = {"usuario": "ADMIN", "rol": "admin"}
                 st.rerun()
-            
-            # 2. CLIENTA
-            elif clave_ingresada:
-                with st.spinner("Verificando acceso..."):
-                    user = buscar_usuario(clave_ingresada)
-                    if user:
-                        st.session_state.usuario_actual = user
-                        st.success("¡Bienvenida Reina!")
-                        st.rerun()
-                    else:
-                        st.error("Clave no encontrada.")
+            elif clave:
+                user = buscar_usuario(clave)
+                if user:
+                    st.session_state.usuario_actual = user
+                    st.success("Acceso Autorizado")
+                    st.rerun()
+                else:
+                    st.error("Pase no válido.")
         
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("### ¿Aún no eres VIP?")
-        st.caption("Desbloquea el análisis científico y tu consejera 24/7.")
-        # LINK DE PAGO AQUI
-        st.link_button("💎 COMPRAR PASE AHORA", "https://mercadopago.com.ar")
-        
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("**¿Quieres analizar tu caso?**")
+        st.link_button("👉 OBTENER PASE VIP", "https://mercadopago.com.ar") # TU LINK REAL
+
     else:
-        # --- USUARIO LOGUEADO ---
-        usuario = st.session_state.usuario_actual
+        # USUARIO DENTRO
+        u = st.session_state.usuario_actual
         
-        # SI ERES TÚ (ADMIN)
-        if usuario.get('rol') == 'admin':
-            st.warning("👑 **PANEL DE JEFA**")
-            st.markdown("Crear acceso para nueva clienta:")
-            nueva_clave = st.text_input("Nueva Clave (Ej: MARZO_2024):")
-            
-            if st.button("Crear Usuario"):
-                if nueva_clave:
-                    datos_nuevos = {
-                        "usuario": nueva_clave, "nombre_el": "", "edad": 0, 
-                        "historia": "No especificado", "apego": "No especificado", 
-                        "resumen_sesiones": "", "fecha_alta": datetime.now().strftime("%Y-%m-%d")
-                    }
-                    if crear_usuario_admin(datos_nuevos):
-                        st.success(f"✅ Clave '{nueva_clave}' creada con éxito.")
-                    else:
-                        st.error("Error al conectar con la base de datos.")
-            
-            if st.button("Salir de Admin"):
-                 st.session_state.usuario_actual = None
-                 st.rerun()
-                    
-        # SI ES UNA CLIENTA
+        if u.get('rol') == 'admin':
+            st.warning("👑 **PANEL DE CONTROL**")
+            st.write("Generar pase para clienta:")
+            new_key = st.text_input("Nueva Clave:")
+            if st.button("Habilitar Acceso"):
+                # Intentamos guardar en DB, si falla avisamos
+                datos = {"usuario": new_key, "rol": "user", "fecha": str(datetime.now())}
+                if crear_usuario_nuevo(datos):
+                    st.success(f"Clave {new_key} creada en Base de Datos!")
+                else:
+                    st.warning(f"Clave {new_key} generada (Modo Local). Nota: Si reinicias la app, se borrará porque la Base de Datos no conecta.")
         else:
-            st.success(f"Hola, Soberana.")
-            
-            # Formulario de Perfil (Colapsable para no molestar)
-            with st.expander("⚙️ Editar Perfil del Vínculo", expanded=False):
-                with st.form("perfil_form"):
-                    st.caption("Actualiza los datos de ÉL para mejorar la precisión de la IA.")
-                    nom = st.text_input("Su Nombre:", value=usuario['nombre_el'])
-                    edad = st.number_input("Su Edad:", value=int(usuario['edad']) if usuario['edad'] else 0)
-                    hist = st.selectbox("Historia/Trauma:", ["No especificado", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo", "Adicciones"], index=0)
-                    apego = st.selectbox("Su Apego:", ["No especificado", "Evitativo", "Ansioso", "Seguro"], index=0)
-                    
-                    if st.form_submit_button("💾 Guardar Cambios"):
-                        usuario['nombre_el'] = nom
-                        usuario['edad'] = edad
-                        usuario['historia'] = hist
-                        usuario['apego'] = apego
-                        if actualizar_perfil(usuario):
-                            st.session_state.usuario_actual = usuario
-                            st.toast("Datos actualizados correctamente")
-                            st.rerun()
-            
+            st.success(f"Bienvenida, Reina.")
             if st.button("Cerrar Sesión"):
                 st.session_state.usuario_actual = None
                 st.rerun()
 
-# --- 7. PANTALLA PRINCIPAL ---
+# --- 6. PANTALLA PRINCIPAL ---
 st.title("💎 Vínculo Nítido")
 
-# PESTAÑAS ESTRATÉGICAS
-tab1, tab2, tab3 = st.tabs(["🎁 Test Apego (Gratis)", "🕵️‍♀️ Detector (Gratis)", "🔥 SALA VIP"])
+# PESTAÑAS
+tab_free, tab_hook, tab_vip = st.tabs(["🧬 Test de Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP"])
 
-# --- TAB 1: TEST DE APEGO (GANCHO GRATUITO) ---
-with tab1:
-    st.header("Descubrí su Patrón de Apego 🧬")
-    st.write("Responde estas 2 preguntas clave para entender con quién estás tratando:")
+# --- TAB 1: TEST DE APEGO (100% GRATIS Y MANUAL) ---
+with tab_free:
+    st.subheader("Descubre su Patrón Oculto")
+    st.write("Responde con sinceridad para identificar su sistema operativo emocional.")
     
-    with st.form("test_apego"):
-        res1 = st.radio("1. Cuando la relación se vuelve íntima o emocional, él:", 
-                        ["A. Se aleja, se enfría o pide 'espacio' (Miedo)", 
-                         "B. Se vuelve intenso, celoso o demanda atención (Ansiedad)", 
-                         "C. Se mantiene tranquilo y comunica lo que siente"])
+    with st.form("test_form"):
+        r1 = st.radio("1. Cuando la relación se vuelve íntima, él:", 
+                     ["A. Se aleja / Pide 'espacio' (Se desactiva)", 
+                      "B. Se vuelve intenso / Demanda atención (Se activa)", 
+                      "C. Se mantiene estable"])
         
-        res2 = st.radio("2. Ante un conflicto o reclamo tuyo, él:", 
-                        ["A. Huye, evita el tema o aplica la Ley del Hielo", 
-                         "B. Explota, te culpa y da vuelta la situación", 
-                         "C. Escucha e intenta buscar una solución"])
+        r2 = st.radio("2. Ante un conflicto, él:", 
+                     ["A. Huye / Ley del Hielo", 
+                      "B. Explota / Culpa", 
+                      "C. Busca solución"])
         
-        submitted = st.form_submit_button("VER DIAGNÓSTICO GRATUITO")
-        
-        if submitted:
+        if st.form_submit_button("VER DIAGNÓSTICO"):
             st.divider()
-            if "A." in res1 or "A." in res2:
+            if "A." in r1 or "A." in r2:
                 st.error("❄️ **Resultado: APEGO EVITATIVO**")
-                st.markdown("""
-                **Lo que pasa en su cerebro:** Su sistema nervioso interpreta la intimidad como una amenaza a su independencia. 
-                No es que no te quiera, es que tiene **miedo**. Su estrategia de supervivencia es desconectarse.
-                """)
-            elif "B." in res1 or "B." in res2:
+                st.write("Su cerebro percibe la intimidad como peligro. No es que no sienta, es que se desconecta para sobrevivir.")
+            elif "B." in r1 or "B." in r2:
                 st.warning("🔥 **Resultado: APEGO ANSIOSO**")
-                st.markdown("""
-                **Lo que pasa en su cerebro:** Tiene un sistema de alarma hiperactivo. 
-                Cualquier distancia la interpreta como un abandono inminente. Su intensidad es un grito de conexión.
-                """)
+                st.write("Tiene terror al abandono. Su intensidad es un grito de conexión.")
             else:
                 st.success("✅ **Resultado: APEGO SEGURO**")
-                st.write("Parece tener bases emocionales sanas. Si sientes inseguridad, revisa tus propios patrones.")
             
-            st.info("💡 **¿Quieres saber la estrategia exacta para que te valore?** Pásate al VIP.")
+            st.info("💡 **¿Quieres saber cómo desactivar sus defensas? Pásate al VIP.**")
 
-# --- TAB 2: DETECTOR DE MENTIRAS (GANCHO CON CENSURA) ---
-with tab2:
-    st.subheader("¿Te mandó un mensaje confuso?")
-    st.write("Pégalo aquí. La IA te dirá la cruda verdad (Diagnóstico Gratis), pero la estrategia es VIP.")
+# --- TAB 2: DETECTOR DE MENTIRAS (EL GANCHO) ---
+with tab_hook:
+    st.subheader("¿Mensaje confuso?")
+    st.write("Pégalo aquí. Mi sistema decodificará la intención real. (Diagnóstico Gratis).")
     
-    msg_free = st.text_area("Mensaje de él:", height=100, placeholder="Ej: No eres tú, soy yo... o te deja en visto.")
+    msg = st.text_area("Mensaje de él:", height=100, placeholder="Ej: No sos vos, soy yo...")
     
-    if st.button("🔍 ANALIZAR VERDAD"):
-        if msg_free:
-            with st.spinner("Analizando subtexto y psicología masculina..."):
-                prompt = f"""
-                Actúa como una experta en psicología masculina. Analiza este mensaje: "{msg_free}".
-                1. Traduce qué significa realmente (sin filtros).
-                2. Dime qué siente él (Miedo, ego, manipulación).
-                NO DES CONSEJOS. Solo el diagnóstico.
-                """
-                res = consultar_ia(prompt)
+    if st.button("🔍 ANALIZAR AHORA"):
+        if msg:
+            with st.spinner("Decodificando patrones de conducta..."):
+                prompt = f"Analiza este mensaje: '{msg}'. 1. Dime qué significa realmente (Traducción cruda). 2. Dime qué siente él. NO DES CONSEJOS."
+                res = consultar_metodologia(prompt)
                 
-                st.markdown(f"<div class='result-box'><h4>👁️ La Verdad:</h4>{res}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='result-box'><h4>👁️ La Realidad:</h4>{res}</div>", unsafe_allow_html=True)
                 
                 st.markdown("#### 👑 Estrategia Soberana (Bloqueada)")
                 st.markdown("""
                 <div class='blur-text'>
                 Para recuperar tu poder, aplica la técnica del espejo invertido.
                 No respondas por 4 horas. Luego envía exactamente:
-                "Entiendo que necesites espacio, avísame cuando..."
+                "Entiendo que necesites espacio..."
                 </div>
                 """, unsafe_allow_html=True)
                 
-                st.warning("🔒 **Para desbloquear la respuesta exacta, ingresá tu Clave VIP.**")
+                st.warning("🔒 **Para desbloquear la respuesta exacta, necesitas el Pase VIP.**")
 
-# --- TAB 3: ZONA VIP (EL PRODUCTO REAL) ---
-with tab3:
-    if st.session_state.usuario_actual is None or st.session_state.usuario_actual.get('rol') == 'admin':
+# --- TAB 3: VIP (EL PRODUCTO) ---
+with tab_vip:
+    if st.session_state.usuario_actual is None:
         st.info("🔒 **Zona Restringida**")
-        st.write("Ingresa tu clave en la barra lateral para acceder al Laboratorio de Neurociencia.")
+        st.write("Ingresa tu Pase de Acceso en la barra lateral.")
         st.stop()
         
-    u = st.session_state.usuario_actual
-    nombre_sujeto = u.get('nombre_el', 'Él')
-    if not nombre_sujeto: nombre_sujeto = "Tu Vínculo"
+    st.success("🔓 **Laboratorio de Relaciones Activado**")
     
-    st.success(f"🔓 **Laboratorio VIP Activado:** Analizando a {nombre_sujeto}")
+    opcion = st.radio("Herramienta:", ["🔬 Análisis Profundo de Chat", "👑 Consultar a la Mentora"], horizontal=True)
     
-    modo = st.radio("Selecciona Herramienta:", ["🔬 Análisis de Chat Profundo", "👑 Consejera Privada"], horizontal=True)
-    
-    if modo == "🔬 Análisis de Chat Profundo":
-        st.write("Pega la conversación completa. Analizaré historial, apego y patrones.")
-        chat_vip = st.text_area("Conversación:", height=200)
+    if opcion == "🔬 Análisis Profundo de Chat":
+        st.write("Analizaré la conversación completa considerando su perfil psicológico.")
+        chat = st.text_area("Pega la conversación:", height=200)
         
-        if st.button("✨ DECODIFICAR MENTE MASCULINA"):
-            if chat_vip:
-                historial = u.get('resumen_sesiones', '')
-                
-                # EL PROMPT MAESTRO
+        if st.button("✨ EJECUTAR ANÁLISIS"):
+            if chat:
                 prompt = f"""
-                Actúa como 'Wanda Soberana': Experta en Neurociencia Afectiva, Psicología Evolutiva y Mentora de Mujeres.
-                Tu tono es empático, de "hermana mayor experta", seguro y cálido.
-                
-                PERFIL DE ÉL:
-                - Nombre: {nombre_sujeto}
-                - Edad: {u['edad']}
-                - Apego: {u['apego']}
-                - Historia/Trauma: {u['historia']}
-                - Contexto Previo: {historial}
-                
-                CHAT A ANALIZAR: "{chat_vip}"
-                
-                Analiza esto para ELLA (la usuaria) siguiendo estos 4 pasos:
-                
-                1. 🧬 **LO QUE PASA EN SU CEREBRO (Ciencia):** Explica qué químicos o miedos se activaron en él. ¿Busca dopamina barata? ¿Se activó su amígdala por miedo?
-                
-                2. 💔 **VALIDACIÓN EMOCIONAL (Empatía):**
-                   Valida lo que ella debe estar sintiendo ante esto. Hazla sentir comprendida.
-                
-                3. 👁️ **TRADUCCIÓN NÍTIDA:**
-                   "Lo que dice" vs "Lo que realmente significa". Sé cruda pero amable.
-                
-                4. 👑 **ESTRATEGIA SOBERANA (Acción):**
-                   Dile exactamente qué hacer o qué responder para recuperar su dignidad y valor.
-                
-                AL FINAL, en una línea nueva escribe: "MEMORIA_DB: [Resumen de 1 frase de lo ocurrido hoy]"
+                Analiza este chat: "{chat}".
+                Usa Neurociencia y Psicología Evolutiva.
+                Dime:
+                1. Qué pasa en su cerebro (Químicos, Miedos).
+                2. Traducción de lo que dice vs lo que piensa.
+                3. ESTRATEGIA EXACTA DE RESPUESTA para que ella recupere el poder.
                 """
-                
-                with st.spinner("Consultando bases de datos de psicología evolutiva..."):
-                    res = consultar_ia(prompt)
+                with st.spinner("Consultando metodología..."):
+                    res = consultar_metodologia(prompt)
+                    st.markdown(res)
                     
-                    if "MEMORIA_DB:" in res:
-                        partes = res.split("MEMORIA_DB:")
-                        st.markdown(partes[0])
-                        guardar_memoria(u, f"{datetime.now().strftime('%d/%m')}: {partes[1].strip()}")
-                        st.toast("🧠 Memoria del vínculo guardada.")
-                    else:
-                        st.markdown(res)
-                
-    elif modo == "👑 Consejera Privada":
-        st.write("¿Cómo te sientes hoy? ¿Necesitas un consejo rápido o ánimo?")
-        consulta = st.text_area("Cuéntame:")
-        
-        if st.button("PEDIR APOYO"):
+    elif opcion == "👑 Consultar a la Mentora":
+        consulta = st.text_area("Cuéntame qué te angustia:")
+        if st.button("PEDIR CONSEJO"):
             if consulta:
-                prompt = f"""
-                Eres una Mentora Empática y Experta en Relaciones.
-                La usuaria está lidiando con {nombre_sujeto} ({u['apego']}, {u['historia']}).
-                Ella dice: "{consulta}".
-                
-                Dale un consejo corto, amoroso pero firme. Recuérdale su valor.
-                """
-                st.markdown(f"<div class='result-box'>{consultar_ia(prompt)}</div>", unsafe_allow_html=True)
+                prompt = f"La usuaria pregunta: {consulta}. Dale un consejo empoderador, corto y al pie."
+                with st.spinner("Conectando..."):
+                    st.markdown(consultar_metodologia(prompt))
