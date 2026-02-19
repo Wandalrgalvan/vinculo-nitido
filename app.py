@@ -4,124 +4,89 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-# --- 1. CONFIGURACIÓN VISUAL (Mágica y sin rastro de Robot) ---
+# --- 1. CONFIGURACIÓN ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="centered")
 
+# --- 2. ESTILO VISUAL (MÍSTICO Y ELEGANTE) ---
 st.markdown("""
     <style>
-    /* Fondo Místico */
-    .stApp {
-        background: linear-gradient(180deg, #120318 0%, #2D0545 100%);
-        color: #FDFDFD;
-    }
+    .stApp { background: linear-gradient(180deg, #120318 0%, #2D0545 100%); color: #fff; }
+    h1, h2, h3 { color: #D4AF37 !important; }
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
     
-    /* Ocultar elementos de Streamlit que delatan que es un bot */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
-    /* Botones Premium */
     .stButton>button {
         background: linear-gradient(90deg, #D4AF37 0%, #F2994A 100%);
-        color: #120318;
-        font-weight: 800;
-        border: none;
-        border-radius: 12px;
-        padding: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-        transition: transform 0.2s;
+        color: #120318; font-weight: bold; border-radius: 12px; border: none; width: 100%; padding: 15px;
     }
-    .stButton>button:hover { transform: scale(1.02); }
-    
-    /* Inputs Estilo Chat Privado */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: white !important;
-        border-radius: 10px;
-        border: 1px solid #D4AF37;
+        background-color: rgba(255, 255, 255, 0.08) !important; color: white !important; border: 1px solid #D4AF37;
     }
-    
-    /* Texto Borroso (Censura) */
-    .blur-text {
-        color: transparent;
-        text-shadow: 0 0 15px rgba(255,255,255,0.7);
-        filter: blur(6px);
-        user-select: none;
-        pointer-events: none;
-    }
-    
-    /* Caja de Resultados */
-    .result-box {
-        background: rgba(45, 5, 69, 0.8);
-        border-left: 5px solid #D4AF37;
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 15px;
-    }
+    .blur-text { filter: blur(5px); user-select: none; opacity: 0.6; pointer-events: none; }
+    .result-box { background: rgba(0,0,0,0.3); padding: 20px; border-left: 4px solid #D4AF37; border-radius: 10px; margin-top: 15px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. GESTIÓN DE DATOS (HÍBRIDA: SI FALLA GOOGLE, USA MEMORIA LOCAL) ---
+# --- 3. BASE DE DATOS (GOOGLE SHEETS) ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-def obtener_datos_db():
-    """Intenta leer Google Sheets. Si falla, usa memoria temporal."""
+def gestionar_usuario_automatico(clave):
+    """Auto-Registro: Si la usuaria no existe, la crea en el momento."""
     try:
         df = conn.read(worksheet="vinculo_db", ttl=0)
         df['usuario'] = df['usuario'].astype(str)
-        return df
-    except:
-        # MODO A PRUEBA DE FALLOS (Para que puedas entrar HOY)
-        return pd.DataFrame([
-            {"usuario": "SOBERANA_JEFA", "rol": "admin", "nombre_el": "Admin"},
-            {"usuario": "CLIENTA_TEST", "rol": "user", "nombre_el": "El de prueba", "edad": 30, "apego": "Evitativo", "historia": "Normal"}
-        ])
+        usuario = df[df['usuario'] == str(clave)]
+        
+        if not usuario.empty:
+            return usuario.iloc[0].to_dict()
+        else:
+            # CREACIÓN AUTOMÁTICA (Ideal para la madrugada)
+            nuevo = {
+                "usuario": clave, "nombre_el": "", "edad": 30, 
+                "historia": "No especificado", "apego": "No especificado", "resumen_sesiones": ""
+            }
+            df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
+            conn.update(worksheet="vinculo_db", data=df)
+            return nuevo
+    except Exception as e:
+        st.error(f"Error de conexión con la Base de Datos: {e}")
+        return None
 
-def buscar_usuario(clave):
-    df = obtener_datos_db()
-    usuario = df[df['usuario'] == str(clave)]
-    if not usuario.empty:
-        return usuario.iloc[0].to_dict()
-    return None
-
-def crear_usuario_nuevo(datos):
-    """Intenta guardar en Google. Si falla, avisa pero no rompe."""
+def actualizar_perfil(datos):
+    """Guarda los cambios de edad, apego y trauma en Google Sheets."""
     try:
         df = conn.read(worksheet="vinculo_db", ttl=0)
-        nuevo = pd.DataFrame([datos])
-        df = pd.concat([df, nuevo], ignore_index=True)
+        df['usuario'] = df['usuario'].astype(str)
+        idx = df[df['usuario'] == str(datos['usuario'])].index[0]
+        for k, v in datos.items():
+            df.at[idx, k] = v
         conn.update(worksheet="vinculo_db", data=df)
         return True
-    except:
-        return False # Falló la conexión real
+    except: return False
 
-# --- 3. CEREBRO DE WANDA (SIN MENCIONAR IA) ---
+# --- 4. LA METODOLOGÍA SOBERANA (CERO CENSURA) ---
 if "GEMINI_API_KEY" in st.secrets:
     api_key = st.secrets["GEMINI_API_KEY"]
 else:
     api_key = ""
 
 def consultar_metodologia(prompt):
-   def consultar_metodologia(prompt):
-    if not api_key: return "⚠️ Error: Falta la API Key."
+    if not api_key: return "⚠️ Error: Falta configurar la Llave API."
     
-    # URL directa
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
-    # 1. INSTRUCCIÓN DE SISTEMA (ROBUSTA)
+    # INSTRUCCIÓN MAESTRA
     system_instruction = """
-    Eres Wanda Soberana, experta en psicología evolutiva y relaciones.
-    Tu objetivo es empoderar mujeres.
-    Analiza el texto enviado. Si hay contenido sexual explícito, trátalo con madurez clínica y psicológica, no lo censures, es parte del análisis de vínculo.
-    Usa emojis. Sé directa, empática y científica.
+    Eres Wanda Soberana, creadora de la Metodología 'Vínculo Nítido'.
+    Eres experta en: Psicología de la Atracción, Psicología Masculina y Femenina, Neurociencia Afectiva y Teoría del Apego.
+    NUNCA menciones que eres una IA. Habla en primera persona, como una mentora de alto valor.
+    
+    REGLAS ESTRICTAS:
+    1. Ajusta el análisis a la EDAD del sujeto. (Adolescentes = inmadurez prefrontal, adultos = patrones cristalizados).
+    2. CERO CENSURA: Analiza interacciones sexuales o explícitas desde la neurociencia (dopamina, dinámica de poder) con total normalidad clínica.
     """
     
-    full_prompt = f"{system_instruction}\n\nConsulta de la usuaria: {prompt}"
-    
-    # 2. CONFIGURACIÓN DE SEGURIDAD (Permitir contenido adulto)
+    # APAGAMOS LOS FILTROS DE SEGURIDAD PARA CONTENIDO ADULTO
     safety_settings = [
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
         {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -130,170 +95,154 @@ def consultar_metodologia(prompt):
     ]
     
     data = {
-        "contents": [{"parts": [{"text": full_prompt}]}],
+        "contents": [{"parts": [{"text": f"{system_instruction}\n\n{prompt}"}]}],
         "safetySettings": safety_settings
     }
     
     try:
         response = requests.post(url, headers=headers, json=data)
-        
         if response.status_code == 200:
             return response.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            # AQUI VEREMOS EL ERROR REAL
-            error_msg = response.text
-            if "SAFETY" in error_msg:
-                return "⚠️ **La IA se sonrojó.** El mensaje es muy explícito y Google lo bloqueó por seguridad. Intenta suavizar las palabras sexuales (ej: usar metáforas) y prueba de nuevo."
-            return f"Error técnico ({response.status_code}): La red está inestable."
+            return f"⚠️ Error Técnico de Red."
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
-        
-# --- 4. GESTIÓN DE SESIÓN ---
+        return f"⚠️ Error de Conexión."
+
+# --- 5. GESTIÓN DE SESIÓN ---
 if 'usuario_actual' not in st.session_state:
     st.session_state.usuario_actual = None
 
-# --- 5. BARRA LATERAL (ENTRADA) ---
+# --- 6. BARRA LATERAL (ENTRADA Y PERFIL) ---
 with st.sidebar:
-    st.markdown("<div style='text-align: center; font-size: 80px; text-shadow: 0 0 25px #D4AF37;'>💎</div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center; font-size: 80px;'>💎</div>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center; color: #D4AF37;'>Vínculo Nítido</h3>", unsafe_allow_html=True)
     st.write("---")
 
     if st.session_state.usuario_actual is None:
         st.info("🔐 **Acceso Privado**")
-        clave = st.text_input("Ingresa tu Pase de Acceso:", type="password")
-        
+        clave = st.text_input("Ingresa tu Pase:", type="password", help="Si compraste el acceso, inventa tu clave ahora para registrarte.")
         if st.button("ENTRAR AL LABORATORIO"):
-            if clave == "SOBERANA_JEFA": # Clave Maestra Hardcodeada (Siempre funciona)
-                st.session_state.usuario_actual = {"usuario": "ADMIN", "rol": "admin"}
-                st.rerun()
-            elif clave:
-                user = buscar_usuario(clave)
-                if user:
-                    st.session_state.usuario_actual = user
-                    st.success("Acceso Autorizado")
-                    st.rerun()
-                else:
-                    st.error("Pase no válido.")
-        
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown("**¿Quieres analizar tu caso?**")
-        st.link_button("👉 OBTENER PASE VIP", "https://mercadopago.com.ar") # TU LINK REAL
-
+            if clave:
+                with st.spinner("Conectando..."):
+                    user = gestionar_usuario_automatico(clave)
+                    if user:
+                        st.session_state.usuario_actual = user
+                        st.rerun()
+        st.write("---")
+        st.markdown("**¿Necesitas respuestas hoy?**")
+        st.link_button("💎 OBTENER PASE VIP", "https://mercadopago.com.ar")
     else:
-        # USUARIO DENTRO
         u = st.session_state.usuario_actual
+        st.success(f"Bienvenida, Soberana.")
         
-        if u.get('rol') == 'admin':
-            st.warning("👑 **PANEL DE CONTROL**")
-            st.write("Generar pase para clienta:")
-            new_key = st.text_input("Nueva Clave:")
-            if st.button("Habilitar Acceso"):
-                # Intentamos guardar en DB, si falla avisamos
-                datos = {"usuario": new_key, "rol": "user", "fecha": str(datetime.now())}
-                if crear_usuario_nuevo(datos):
-                    st.success(f"Clave {new_key} creada en Base de Datos!")
-                else:
-                    st.warning(f"Clave {new_key} generada (Modo Local). Nota: Si reinicias la app, se borrará porque la Base de Datos no conecta.")
-        else:
-            st.success(f"Bienvenida, Reina.")
-            if st.button("Cerrar Sesión"):
-                st.session_state.usuario_actual = None
-                st.rerun()
+        # PERFIL VINCULAR (Se guarda en Base de Datos)
+        with st.expander("⚙️ Perfil del Vínculo", expanded=True):
+            st.caption("Ajusta estos datos para que el análisis sea exacto.")
+            with st.form("perfil_form"):
+                nom = st.text_input("Nombre:", value=u.get('nombre_el', ''))
+                edad_val = int(u.get('edad', 30)) if pd.notna(u.get('edad', 30)) else 30
+                edad = st.number_input("Edad (Clave para neurociencia):", min_value=13, max_value=90, value=edad_val)
+                apego = st.selectbox("Apego:", ["No especificado", "Evitativo", "Ansioso", "Seguro"], index=0)
+                historia = st.selectbox("Infancia/Trauma:", ["No especificado", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
+                
+                if st.form_submit_button("💾 Guardar Datos"):
+                    u['nombre_el'] = nom
+                    u['edad'] = edad
+                    u['apego'] = apego
+                    u['historia'] = historia
+                    if actualizar_perfil(u):
+                        st.session_state.usuario_actual = u
+                        st.toast("Perfil sincronizado con éxito.")
+                        st.rerun()
+            
+        if st.button("Cerrar Sesión"):
+            st.session_state.usuario_actual = None
+            st.rerun()
 
-# --- 6. PANTALLA PRINCIPAL ---
+# --- 7. PANTALLA PRINCIPAL ---
 st.title("💎 Vínculo Nítido")
 
-# PESTAÑAS
-tab_free, tab_hook, tab_vip = st.tabs(["🧬 Test de Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP"])
+tab1, tab2, tab3 = st.tabs(["🧬 Test de Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP"])
 
-# --- TAB 1: TEST DE APEGO (100% GRATIS Y MANUAL) ---
-with tab_free:
-    st.subheader("Descubre su Patrón Oculto")
-    st.write("Responde con sinceridad para identificar su sistema operativo emocional.")
-    
-    with st.form("test_form"):
-        r1 = st.radio("1. Cuando la relación se vuelve íntima, él:", 
-                     ["A. Se aleja / Pide 'espacio' (Se desactiva)", 
-                      "B. Se vuelve intenso / Demanda atención (Se activa)", 
-                      "C. Se mantiene estable"])
-        
-        r2 = st.radio("2. Ante un conflicto, él:", 
-                     ["A. Huye / Ley del Hielo", 
-                      "B. Explota / Culpa", 
-                      "C. Busca solución"])
-        
-        if st.form_submit_button("VER DIAGNÓSTICO"):
+# --- TAB 1: TEST GRATIS ---
+with tab1:
+    st.header("Descubre su Patrón de Apego")
+    st.write("Identifica su sistema operativo emocional:")
+    with st.form("test"):
+        r1 = st.radio("Ante la intimidad emocional, él:", ["Se aleja (Miedo)", "Se pone intenso (Ansiedad)", "Estable"])
+        r2 = st.radio("Ante conflictos, él:", ["Huye / Silencio", "Explota / Culpa", "Dialoga"])
+        if st.form_submit_button("VER RESULTADO"):
             st.divider()
-            if "A." in r1 or "A." in r2:
+            if "aleja" in r1 or "Huye" in r2:
                 st.error("❄️ **Resultado: APEGO EVITATIVO**")
-                st.write("Su cerebro percibe la intimidad como peligro. No es que no sienta, es que se desconecta para sobrevivir.")
-            elif "B." in r1 or "B." in r2:
+                st.write("Su cerebro asocia amor con pérdida de libertad. Se desactiva para protegerse.")
+            elif "intenso" in r1 or "Explota" in r2:
                 st.warning("🔥 **Resultado: APEGO ANSIOSO**")
-                st.write("Tiene terror al abandono. Su intensidad es un grito de conexión.")
+                st.write("Su intensidad es terror al abandono.")
             else:
                 st.success("✅ **Resultado: APEGO SEGURO**")
-            
-            st.info("💡 **¿Quieres saber cómo desactivar sus defensas? Pásate al VIP.**")
 
-# --- TAB 2: DETECTOR DE MENTIRAS (EL GANCHO) ---
-with tab_hook:
+# --- TAB 2: GANCHO GRATIS ---
+with tab2:
     st.subheader("¿Mensaje confuso?")
-    st.write("Pégalo aquí. Mi sistema decodificará la intención real. (Diagnóstico Gratis).")
-    
-    msg = st.text_area("Mensaje de él:", height=100, placeholder="Ej: No sos vos, soy yo...")
-    
-    if st.button("🔍 ANALIZAR AHORA"):
+    msg = st.text_area("Pégalo aquí:", height=100)
+    if st.button("ANALIZAR (GRATIS)"):
         if msg:
-            with st.spinner("Decodificando patrones de conducta..."):
-                prompt = f"Analiza este mensaje: '{msg}'. 1. Dime qué significa realmente (Traducción cruda). 2. Dime qué siente él. NO DES CONSEJOS."
+            prompt = f"Analiza este mensaje aplicando Psicología Masculina: '{msg}'. Dime qué significa realmente. NO DES CONSEJOS."
+            with st.spinner("Procesando patrones..."):
                 res = consultar_metodologia(prompt)
-                
-                st.markdown(f"<div class='result-box'><h4>👁️ La Realidad:</h4>{res}</div>", unsafe_allow_html=True)
-                
+                st.markdown(f"<div class='result-box'><h4>👁️ La Verdad:</h4>{res}</div>", unsafe_allow_html=True)
                 st.markdown("#### 👑 Estrategia Soberana (Bloqueada)")
-                st.markdown("""
-                <div class='blur-text'>
-                Para recuperar tu poder, aplica la técnica del espejo invertido.
-                No respondas por 4 horas. Luego envía exactamente:
-                "Entiendo que necesites espacio..."
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.warning("🔒 **Para desbloquear la respuesta exacta, necesitas el Pase VIP.**")
+                st.markdown("<div class='blur-text'>Para mantener tu valor, aplica el espejo invertido. Espera 4 horas y dile...</div>", unsafe_allow_html=True)
+                st.warning("🔒 **Desbloquea la respuesta exacta en el VIP.**")
 
-# --- TAB 3: VIP (EL PRODUCTO) ---
-with tab_vip:
+# --- TAB 3: VIP (FULL POWER) ---
+with tab3:
     if st.session_state.usuario_actual is None:
-        st.info("🔒 **Zona Restringida**")
-        st.write("Ingresa tu Pase de Acceso en la barra lateral.")
+        st.info("🔒 Ingresa tu pase a la izquierda para entrar.")
         st.stop()
         
-    st.success("🔓 **Laboratorio de Relaciones Activado**")
+    u = st.session_state.usuario_actual
+    edad_sujeto = u.get('edad', 30)
     
-    opcion = st.radio("Herramienta:", ["🔬 Análisis Profundo de Chat", "👑 Consultar a la Mentora"], horizontal=True)
+    st.success(f"🔓 **Laboratorio Activado** | Analizando Sujeto de: {edad_sujeto} años.")
     
-    if opcion == "🔬 Análisis Profundo de Chat":
-        st.write("Analizaré la conversación completa considerando su perfil psicológico.")
-        chat = st.text_area("Pega la conversación:", height=200)
-        
-        if st.button("✨ EJECUTAR ANÁLISIS"):
-            if chat:
+    chat = st.text_area("Pega la conversación completa (sin censura):", height=250)
+    
+    if st.button("✨ DECODIFICAR VÍNCULO"):
+        if chat:
+            with st.spinner("Aplicando Psicología de la Atracción y Neurociencia..."):
+                historial = u.get('resumen_sesiones', '')
+                
+                # PROMPT VIP CON EDAD Y CERO CENSURA
                 prompt = f"""
-                Analiza este chat: "{chat}".
-                Usa Neurociencia y Psicología Evolutiva.
-                Dime:
-                1. Qué pasa en su cerebro (Químicos, Miedos).
-                2. Traducción de lo que dice vs lo que piensa.
-                3. ESTRATEGIA EXACTA DE RESPUESTA para que ella recupere el poder.
+                ANÁLISIS DE CASO VIP:
+                - Edad del sujeto: {edad_sujeto} años.
+                - Estilo de Apego: {u.get('apego', 'No especificado')}.
+                - Trauma de Infancia: {u.get('historia', 'No especificado')}.
+                - Historial Previo: {historial}
+                
+                CHAT A ANALIZAR:
+                "{chat}"
+                
+                Aplica la Metodología Soberana. Entrega 3 bloques exactos:
+                
+                1. 🧬 **NEUROCIENCIA Y PSICOLOGÍA MASCULINA:** Explica su comportamiento basado en su química cerebral (dopamina, adrenalina) y ajústalo estrictamente a su edad biológica ({edad_sujeto} años). Si hay contenido sexual, analízalo clínicamente.
+                2. 👁️ **TRADUCCIÓN NÍTIDA:** Qué dice vs. Qué significa realmente.
+                3. 👑 **ESTRATEGIA SOBERANA:** Qué debe hacer o responder la usuaria para mantener su alto valor.
+                
+                Al final, escribe en una línea nueva: "MEMORIA_DB: [Resumen de 10 palabras de esta interacción]"
                 """
-                with st.spinner("Consultando metodología..."):
-                    res = consultar_metodologia(prompt)
+                
+                res = consultar_metodologia(prompt)
+                
+                if "MEMORIA_DB:" in res:
+                    partes = res.split("MEMORIA_DB:")
+                    st.markdown(partes[0])
+                    # Guardamos el resumen en la Base de Datos
+                    memoria_nueva = partes[1].strip()
+                    u['resumen_sesiones'] = f"{datetime.now().strftime('%d/%m')}: {memoria_nueva} | {historial}"[:4000]
+                    actualizar_perfil(u)
+                    st.toast("🧠 Memoria del vínculo actualizada.")
+                else:
                     st.markdown(res)
-                    
-    elif opcion == "👑 Consultar a la Mentora":
-        consulta = st.text_area("Cuéntame qué te angustia:")
-        if st.button("PEDIR CONSEJO"):
-            if consulta:
-                prompt = f"La usuaria pregunta: {consulta}. Dale un consejo empoderador, corto y al pie."
-                with st.spinner("Conectando..."):
-                    st.markdown(consultar_metodologia(prompt))
