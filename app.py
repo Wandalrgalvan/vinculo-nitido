@@ -121,7 +121,8 @@ def consultar_soberana(prompt, edad_sujeto):
     }
     
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=20)
+        # CÓDIGO NUEVO (Espera hasta 60 segundos):
+        response = requests.post(url, headers=headers, json=data, timeout=60)
         if response.status_code == 200:
             try:
                 return response.json()['candidates'][0]['content']['parts'][0]['text']
