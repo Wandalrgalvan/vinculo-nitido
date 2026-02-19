@@ -95,7 +95,8 @@ def consultar_soberana(prompt, edad_sujeto):
     if not api_key:
         return "⚠️ ERROR CRÍTICO: Falta la API Key en los 'Secrets'. Agrega GEMINI_API_KEY en Streamlit Secrets."
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+   # AGREGA ESTA LÍNEA:
+url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
     system_instruction = f"""
