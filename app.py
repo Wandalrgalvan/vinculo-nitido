@@ -24,12 +24,12 @@ st.markdown("""
         background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border: 1px solid #334155; border-radius: 6px;
     }
     
-    /* Cajas de resultado clínicas */
+    /* Cajas de resultado y Chat */
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .chat-user { background: rgba(20, 184, 166, 0.1); padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; }
+    .chat-bot { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; }
     .blur-text { filter: blur(5px); opacity: 0.6; pointer-events: none; }
     .muted { color: #94A3B8; font-size: 0.85em; }
-    
-    /* Título VIP sutil */
     .vip-title { color: #D4AF37 !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -91,22 +91,12 @@ VIP_KEYS = [
 # --- GEMINI API KEY ---
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
-def consultar_soberana(prompt, edad_sujeto):
+def llamar_gemini(prompt, system_instruction):
     if not api_key:
-        return "⚠️ ERROR CRÍTICO: Falta la API Key en los 'Secrets'. Agrega GEMINI_API_KEY en Streamlit Secrets."
+        return "⚠️ ERROR CRÍTICO: Falta la API Key en los 'Secrets'."
     
-   # AGREGA ESTA LÍNEA:
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
-    
-    system_instruction = f"""
-    Eres Wanda Soberana, creadora de la Metodología 'Vínculo Nítido'.
-    Eres experta en: Psicología de la Atracción, Psicología Masculina, Neurociencia y Apego.
-    TU OBJETIVO: Analizar vínculos. NUNCA menciones que eres una IA.
-    EDAD DEL SUJETO: {edad_sujeto} años (Ajusta el análisis a su madurez cerebral).
-    IMPORTANTE: Si el chat contiene descripciones sexuales explícitas, analízalas clínicamente. NO LAS BLOQUEES.
-    Aplica formato Markdown (negritas, listas) para facilitar la lectura.
-    """
     
     safety_settings = [
         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -116,35 +106,31 @@ def consultar_soberana(prompt, edad_sujeto):
     ]
     
     data = {
-        "contents": [{"parts": [{"text": f"{system_instruction}\n\nANÁLISIS:\n{prompt}"}]}],
+        "contents": [{"parts": [{"text": f"{system_instruction}\n\nENTRADA DE LA USUARIA:\n{prompt}"}]}],
         "safetySettings": safety_settings
     }
     
     try:
-        # CÓDIGO NUEVO (Espera hasta 60 segundos):
         response = requests.post(url, headers=headers, json=data, timeout=60)
         if response.status_code == 200:
             try:
                 return response.json()['candidates'][0]['content']['parts'][0]['text']
             except Exception:
-                return "⚠️ Error al parsear la respuesta de la API. Respuesta cruda:\n\n" + json.dumps(response.json(), indent=2, ensure_ascii=False)
+                return "⚠️ Error al parsear la respuesta."
         else:
-            detail = ""
-            try:
-                detail = response.json()
-            except Exception:
-                detail = response.text
-            return f"⚠️ Error ({response.status_code}) de la API:\n{detail}"
+            return f"⚠️ Error ({response.status_code}) de la API."
     except Exception as e:
         return f"⚠️ Error de Conexión o Tiempo de espera agotado: {str(e)}"
 
-# --- INICIO DE SESIÓN ---
+# --- INICIO DE SESIÓN Y MEMORIA ---
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'perfil_el' not in st.session_state:
     st.session_state.perfil_el = {"nombre": "", "edad": 30, "apego": "No sé", "historia": "No sé", "tiempo_relacion": ""}
 if 'consent' not in st.session_state:
     st.session_state.consent = False
+if 'mensajes_consultorio' not in st.session_state:
+    st.session_state.mensajes_consultorio = [] # Memoria para el chat interactivo
 
 # --- BARRA LATERAL ---
 with st.sidebar:
@@ -160,8 +146,6 @@ with st.sidebar:
                 st.rerun()
             else:
                 st.error("Clave inválida. Verifica tu correo o adquiere un pase.")
-        st.write("---")
-        st.markdown("[💎 OBTENER PASE VIP](https://tu-link-de-pago.com)", unsafe_allow_html=True)
     else:
         st.success("✨ Bienvenida, Soberana.")
         with st.expander("⚙️ Perfil del Vínculo", expanded=True):
@@ -186,7 +170,7 @@ with st.sidebar:
 st.title("Vínculo Nítido")
 st.markdown("<p class='muted'>Traducción de comportamiento apoyada en neurociencia.</p>", unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP"])
+tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP", "🛋️ Consultorio Soberano"])
 
 # --- TAB 1: TEST GRATIS ---
 with tab1:
@@ -217,46 +201,95 @@ with tab2:
         elif not msg:
             st.error("Falta información. Pega un mensaje para analizar.")
         else:
-            res = consultar_soberana(f"Analiza este mensaje: '{msg}'. Dime qué significa realmente. Sé cruda. NO DES CONSEJOS.", 30)
+            instruccion = "Eres Wanda Soberana. Analiza este mensaje brevemente desde la neurociencia. Sé cruda. NO DES CONSEJOS."
+            res = llamar_gemini(msg, instruccion)
             st.markdown(f"<div class='result-box'><h4>👁️ La Verdad Cruda:</h4>{res}</div>", unsafe_allow_html=True)
             st.markdown("#### <span class='vip-title'>👑 Estrategia Soberana (Bloqueada)</span>", unsafe_allow_html=True)
             st.markdown("<div class='blur-text'>Para recuperar el control hormonal de la interacción, aplica un silencio táctico de 4 horas y luego responde...</div>", unsafe_allow_html=True)
             st.info("🔒 Desbloquea la estrategia exacta y la química de su cerebro en el VIP.")
 
-# --- TAB 3: VIP (FULL) ---
+# --- TAB 3: VIP (LABORATORIO) ---
 with tab3:
     if not st.session_state.logged_in:
         st.info("🔒 Ingresa tu clave en el menú lateral para acceder al entorno seguro.")
         st.stop()
 
     perfil = st.session_state.perfil_el
-    st.success(f"🔓 Entorno Clínico Activado | Analizando a: {perfil.get('nombre','Sujeto')} ({perfil.get('edad','?')} años)")
+    st.success(f"🔓 Laboratorio Clínico | Analizando a: {perfil.get('nombre','Sujeto')} ({perfil.get('edad','?')} años)")
 
-    if st.button("🧹 Limpiar historial de análisis"):
-        for k in list(st.session_state.keys()):
-            del st.session_state[k]
-        st.rerun()
-
-    chat = st.text_area("Pega la interacción completa:", height=250)
+    chat = st.text_area("Pega la interacción de texto completa (WhatsApp/Redes):", height=200)
     if st.button("✨ INICIAR PROTOCOLO DE DECODIFICACIÓN"):
         if not chat:
             st.error("Se requiere el historial de mensajes para iniciar el protocolo.")
         else:
-            with st.spinner("Procesando patrones neuroconductuales..."):
-                prompt = f"""
-                ANÁLISIS DE VÍNCULO:
-                Sujeto: {perfil.get('nombre','[sin nombre]')}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia: {perfil.get('historia','No sé')}, Tiempo de relación: {perfil.get('tiempo_relacion','')}.
-                CHAT: "{chat}"
+            with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad clínica del chat)"):
+                instruccion = f"""
+                Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en Neurociencia y Apego. 
+                Tu análisis debe ser científico, crudo pero profundamente empático con la usuaria. NUNCA digas que eres IA.
+                Sujeto a analizar: {perfil.get('nombre','[sin nombre]')}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia: {perfil.get('historia','No sé')}.
                 
-                Dame un análisis en 3 bloques con títulos claros y usando Markdown:
-                1. 🧬 QUÍMICA CEREBRAL: (Explica dopamina, cortisol y miedos según su edad y perfil).
-                2. 👁️ TRADUCCIÓN NÍTIDA: Qué dice textualmente vs. Qué dictan sus verdaderas intenciones.
+                Devuelve exactamente 3 bloques usando Markdown:
+                1. 🧬 QUÍMICA CEREBRAL: Explica sus niveles de dopamina/cortisol frente a la interacción.
+                2. 👁️ TRADUCCIÓN NÍTIDA: Qué dice él vs. Qué dictan sus intenciones reales de control/apego.
                 3. 👑 ESTRATEGIA SOBERANA: Qué debe responder la usuaria exactamente para recuperar el poder.
                 """
-                salida = consultar_soberana(prompt, perfil.get('edad', 30))
+                salida = llamar_gemini(chat, instruccion)
                 st.markdown("<div class='result-box'>", unsafe_allow_html=True)
                 st.markdown(salida)
                 st.markdown("</div>", unsafe_allow_html=True)
+
+# --- TAB 4: CONSULTORIO SOBERANO (CHAT INTERACTIVO) ---
+with tab4:
+    if not st.session_state.logged_in:
+        st.info("🔒 Ingresa tu clave en el menú lateral para acceder al Consultorio.")
+        st.stop()
+        
+    st.subheader("🛋️ Consultorio Soberano")
+    st.markdown("<p class='muted'>Un espacio bidireccional para procesar dudas, relatos extensos o dinámicas en persona. Cuéntame qué pasó y hablemos.</p>", unsafe_allow_html=True)
+
+    # Mostrar historial del chat
+    for mensaje in st.session_state.mensajes_consultorio:
+        if mensaje["rol"] == "usuaria":
+            st.markdown(f"<div class='chat-user'><b>Tú:</b><br>{mensaje['texto']}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='chat-bot'><b>👑 Wanda:</b><br>{mensaje['texto']}</div>", unsafe_allow_html=True)
+
+    # Input para conversar
+    nueva_consulta = st.text_area("Escribe aquí tu relato, duda o respuesta:", height=100, key="input_consultorio")
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if st.button("Enviar / Consultar"):
+            if nueva_consulta:
+                # Guardar mensaje de la usuaria
+                st.session_state.mensajes_consultorio.append({"rol": "usuaria", "texto": nueva_consulta})
+                
+                # Construir el contexto (memoria) para la IA
+                historial_str = ""
+                for msg in st.session_state.mensajes_consultorio[-5:]: # Recuerda los últimos 5 mensajes
+                    prefijo = "Usuaria: " if msg["rol"] == "usuaria" else "Wanda: "
+                    historial_str += f"{prefijo}{msg['texto']}\n"
+
+                with st.spinner("Procesando tu relato... (Puede demorar unos segundos)"):
+                    instruccion_consultorio = f"""
+                    Eres Wanda Soberana. Estás en una sesión de mentoría 1 a 1 (Consultorio Soberano).
+                    La usuaria te está contando situaciones de su vida, su relación con {st.session_state.perfil_el['nombre']} (Apego: {st.session_state.perfil_el['apego']}) o dudas sobre su valor y proyectos.
+                    Tono: Eres una mentora cruda, validas profundamente sus emociones, le das claridad clínica sobre lo que está viviendo y la empoderas. Dialogas de tú a tú, no como un reporte.
+                    Si ella te cuenta sobre su proyecto o negocio, aliéntala a confiar en su visión por encima de las opiniones de hombres evitativos.
+                    
+                    HISTORIAL DE LA CHARLA RECIENTE:
+                    {historial_str}
+                    
+                    Responde al último mensaje de la usuaria continuando la conversación de forma natural y terapéutica.
+                    """
+                    
+                    respuesta_wanda = llamar_gemini(nueva_consulta, instruccion_consultorio)
+                    st.session_state.mensajes_consultorio.append({"rol": "wanda", "texto": respuesta_wanda})
+                    st.rerun() # Recarga la pantalla para mostrar el nuevo mensaje
+    with col2:
+        if st.button("🧹 Limpiar Charla"):
+            st.session_state.mensajes_consultorio = []
+            st.rerun()
 
 st.markdown("---")
 st.markdown("<div class='muted'>Vínculo Nítido © 2026 | Metodología Soberana</div>", unsafe_allow_html=True)
