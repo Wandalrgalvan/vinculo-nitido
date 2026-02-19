@@ -8,23 +8,17 @@ st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="cent
 
 st.markdown("""
     <style>
-    /* Paleta Océano Clínico: Reduce ansiedad, transmite autoridad y contención */
+    /* Paleta Océano Clínico */
     .stApp { background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); color: #F8FAFC; }
     h1, h2, h3 { color: #5EEAD4 !important; font-weight: 300; }
-    
-    /* Botones Teal: Llamado a la acción claro y calmante */
     .stButton>button {
         background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);
         color: #FFFFFF; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
     }
     .stButton>button:hover { filter: brightness(1.1); }
-    
-    /* Inputs minimalistas */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div, .stNumberInput>div>div>input {
         background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border: 1px solid #334155; border-radius: 6px;
     }
-    
-    /* Cajas de resultado y Chat */
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .chat-user { background: rgba(20, 184, 166, 0.1); padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; }
     .chat-bot { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; }
@@ -36,56 +30,31 @@ st.markdown("""
 
 # --- VIP KEYS (50 Claves generadas para Venta) ---
 VIP_KEYS = [
-    "a1b2c3d4-e5f6-4789-a012-3456789abcde",
-    "98765432-10fe-dcba-9876-543210fedcba",
-    "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-    "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
-    "11223344-5566-7788-9900-aabbccddeeff",
-    "5f4e3d2c-1b0a-9f8e-7d6c-5b4a3e2d1c0b",
-    "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
-    "cdef1234-5678-90ab-cdef-1234567890ab",
-    "4d3c2b1a-0f9e-8d7c-6b5a-4e3d2c1b0a9f",
-    "aa11bb22-cc33-dd44-ee55-ff6600778899",
-    "00112233-4455-6677-8899-aabbccddeeff",
-    "f0e1d2c3-b4a5-6789-0123-456789abcdef",
-    "12345678-9abc-def0-1234-56789abcdef0",
-    "fedcba98-7654-3210-fedc-ba9876543210",
-    "a0b1c2d3-e4f5-6789-a0b1-c2d3e4f56789",
-    "9f8e7d6c-5b4a-3e21-0f1e-2d3c4b5a6789",
-    "1a2b3c4d-1a2b-3c4d-1a2b-3c4d1a2b3c4d",
-    "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
-    "d4c3b2a1-0f9e-8d7c-6b5a-4e3d2c1b0a9f",
-    "11223344-1122-3344-1122-334411223344",
-    "aabbccdd-eeff-0011-2233-445566778899",
-    "09876543-21fedcba-0987-654321fedcba",
-    "123abc45-6def-7890-123a-bc456def7890",
-    "456def78-9012-3abc-456d-ef7890123abc",
-    "7890123a-bc45-6def-7890-123abc456def",
-    "def01234-5678-9abc-def0-123456789abc",
-    "abc456de-f789-0123-abc4-56def7890123",
-    "01234567-89ab-cdef-0123-456789abcdef",
-    "89abcdef-0123-4567-89ab-cdef01234567",
-    "cdef0123-4567-89ab-cdef-0123456789ab",
-    "ef012345-6789-abcd-ef01-23456789abcd",
-    "23456789-abcd-ef01-2345-6789abcdef01",
-    "6789abcd-ef01-2345-6789-abcdef012345",
-    "abcdef01-2345-6789-abcd-ef0123456789",
-    "3456789a-bcde-f012-3456-789abcdef012",
-    "789abcdef-0123-4567-89ab-cdef01234567",
-    "bcdef012-3456-789a-bcde-f0123456789a",
-    "f0123456-789a-bcde-f012-3456789abcde",
-    "01234567-89ab-cdef-0123-456789abcdef",
-    "456789ab-cdef-0123-4567-89abcdef0123",
-    "89abcdef-0123-4567-89ab-cdef01234567",
-    "cdef0123-4567-89ab-cdef-0123456789ab",
-    "01234567-89ab-cdef-0123-456789abcdef",
-    "456789ab-cdef-0123-4567-89abcdef0123",
-    "89abcdef-0123-4567-89ab-cdef01234567",
-    "cdef0123-4567-89ab-cdef-0123456789ab",
-    "ef012345-6789-abcd-ef01-23456789abcd",
-    "23456789-abcd-ef01-2345-6789abcdef01",
-    "6789abcd-ef01-2345-6789-abcdef012345",
-    "abcdef01-2345-6789-abcd-ef0123456789"
+    "a1b2c3d4-e5f6-4789-a012-3456789abcde", "98765432-10fe-dcba-9876-543210fedcba",
+    "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d", "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
+    "11223344-5566-7788-9900-aabbccddeeff", "5f4e3d2c-1b0a-9f8e-7d6c-5b4a3e2d1c0b",
+    "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d", "cdef1234-5678-90ab-cdef-1234567890ab",
+    "4d3c2b1a-0f9e-8d7c-6b5a-4e3d2c1b0a9f", "aa11bb22-cc33-dd44-ee55-ff6600778899",
+    "00112233-4455-6677-8899-aabbccddeeff", "f0e1d2c3-b4a5-6789-0123-456789abcdef",
+    "12345678-9abc-def0-1234-56789abcdef0", "fedcba98-7654-3210-fedc-ba9876543210",
+    "a0b1c2d3-e4f5-6789-a0b1-c2d3e4f56789", "9f8e7d6c-5b4a-3e21-0f1e-2d3c4b5a6789",
+    "1a2b3c4d-1a2b-3c4d-1a2b-3c4d1a2b3c4d", "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+    "d4c3b2a1-0f9e-8d7c-6b5a-4e3d2c1b0a9f", "11223344-1122-3344-1122-334411223344",
+    "aabbccdd-eeff-0011-2233-445566778899", "09876543-21fedcba-0987-654321fedcba",
+    "123abc45-6def-7890-123a-bc456def7890", "456def78-9012-3abc-456d-ef7890123abc",
+    "7890123a-bc45-6def-7890-123abc456def", "def01234-5678-9abc-def0-123456789abc",
+    "abc456de-f789-0123-abc4-56def7890123", "01234567-89ab-cdef-0123-456789abcdef",
+    "89abcdef-0123-4567-89ab-cdef01234567", "cdef0123-4567-89ab-cdef-0123456789ab",
+    "ef012345-6789-abcd-ef01-23456789abcd", "23456789-abcd-ef01-2345-6789abcdef01",
+    "6789abcd-ef01-2345-6789-abcdef012345", "abcdef01-2345-6789-abcd-ef0123456789",
+    "3456789a-bcde-f012-3456-789abcdef012", "789abcdef-0123-4567-89ab-cdef01234567",
+    "bcdef012-3456-789a-bcde-f0123456789a", "f0123456-789a-bcde-f012-3456789abcde",
+    "01234567-89ab-cdef-0123-456789abcdef", "456789ab-cdef-0123-4567-89abcdef0123",
+    "89abcdef-0123-4567-89ab-cdef01234567", "cdef0123-4567-89ab-cdef-0123456789ab",
+    "01234567-89ab-cdef-0123-456789abcdef", "456789ab-cdef-0123-4567-89abcdef0123",
+    "89abcdef-0123-4567-89ab-cdef01234567", "cdef0123-4567-89ab-cdef-0123456789ab",
+    "ef012345-6789-abcd-ef01-23456789abcd", "23456789-abcd-ef01-2345-6789abcdef01",
+    "6789abcd-ef01-2345-6789-abcdef012345", "abcdef01-2345-6789-abcd-ef0123456789"
 ]
 
 # --- GEMINI API KEY ---
@@ -130,7 +99,7 @@ if 'perfil_el' not in st.session_state:
 if 'consent' not in st.session_state:
     st.session_state.consent = False
 if 'mensajes_consultorio' not in st.session_state:
-    st.session_state.mensajes_consultorio = [] # Memoria para el chat interactivo
+    st.session_state.mensajes_consultorio = []
 
 # --- BARRA LATERAL ---
 with st.sidebar:
@@ -147,13 +116,14 @@ with st.sidebar:
             else:
                 st.error("Clave inválida. Verifica tu correo o adquiere un pase.")
     else:
-        st.success("✨ Bienvenida, Soberana.")
-        with st.expander("⚙️ Perfil del Vínculo", expanded=True):
+        # AQUÍ SE IMPLEMENTÓ EL CAMBIO DE ICONO Y TEXTO DE CRIANZA
+        st.success("👩🏻‍💼 Bienvenida, Soberana.")
+        with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
             with st.form("perfil"):
                 p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el["nombre"])
                 p_edad = st.number_input("Edad:", value=st.session_state.perfil_el["edad"], min_value=15, max_value=90)
                 p_apego = st.selectbox("Apego:", ["No sé", "Evitativo", "Ansioso", "Seguro"], index=0)
-                p_hist = st.selectbox("Historia:", ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
+                p_hist = st.selectbox("Historia de Crianza:", ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
                 p_tiempo = st.text_input("Tiempo de relación:", value=st.session_state.perfil_el.get("tiempo_relacion",""))
                 
                 if st.form_submit_button("💾 Guardar Parámetros"):
@@ -172,7 +142,6 @@ st.markdown("<p class='muted'>Traducción de comportamiento apoyada en neurocien
 
 tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP", "🛋️ Consultorio Soberano"])
 
-# --- TAB 1: TEST GRATIS ---
 with tab1:
     st.header("Descubre su Patrón Cerebral")
     r1 = st.radio("Ante la intimidad, él:", ["Se aleja (Miedo / Sobrecarga)", "Se pone intenso (Ansiedad)", "Estable"])
@@ -188,7 +157,6 @@ with tab1:
         else:
             st.success("✅ **APEGO SEGURO**")
 
-# --- TAB 2: GANCHO GRATIS ---
 with tab2:
     st.subheader("¿Mensaje confuso?")
     consent = st.checkbox("Acepto que este análisis es informativo, basado en patrones de comportamiento, y no sustituye terapia.")
@@ -208,7 +176,6 @@ with tab2:
             st.markdown("<div class='blur-text'>Para recuperar el control hormonal de la interacción, aplica un silencio táctico de 4 horas y luego responde...</div>", unsafe_allow_html=True)
             st.info("🔒 Desbloquea la estrategia exacta y la química de su cerebro en el VIP.")
 
-# --- TAB 3: VIP (LABORATORIO) ---
 with tab3:
     if not st.session_state.logged_in:
         st.info("🔒 Ingresa tu clave en el menú lateral para acceder al entorno seguro.")
@@ -222,11 +189,11 @@ with tab3:
         if not chat:
             st.error("Se requiere el historial de mensajes para iniciar el protocolo.")
         else:
-            with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad clínica del chat)"):
+            with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad)"):
                 instruccion = f"""
                 Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en Neurociencia y Apego. 
                 Tu análisis debe ser científico, crudo pero profundamente empático con la usuaria. NUNCA digas que eres IA.
-                Sujeto a analizar: {perfil.get('nombre','[sin nombre]')}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia: {perfil.get('historia','No sé')}.
+                Sujeto a analizar: {perfil.get('nombre','[sin nombre]')}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia de Crianza: {perfil.get('historia','No sé')}.
                 
                 Devuelve exactamente 3 bloques usando Markdown:
                 1. 🧬 QUÍMICA CEREBRAL: Explica sus niveles de dopamina/cortisol frente a la interacción.
@@ -238,54 +205,46 @@ with tab3:
                 st.markdown(salida)
                 st.markdown("</div>", unsafe_allow_html=True)
 
-# --- TAB 4: CONSULTORIO SOBERANO (CHAT INTERACTIVO) ---
 with tab4:
     if not st.session_state.logged_in:
         st.info("🔒 Ingresa tu clave en el menú lateral para acceder al Consultorio.")
         st.stop()
         
     st.subheader("🛋️ Consultorio Soberano")
-    st.markdown("<p class='muted'>Un espacio bidireccional para procesar dudas, relatos extensos o dinámicas en persona. Cuéntame qué pasó y hablemos.</p>", unsafe_allow_html=True)
+    st.markdown("<p class='muted'>Un espacio bidireccional para procesar dudas o relatos extensos. Cuéntame qué pasó y hablemos.</p>", unsafe_allow_html=True)
 
-    # Mostrar historial del chat
     for mensaje in st.session_state.mensajes_consultorio:
         if mensaje["rol"] == "usuaria":
             st.markdown(f"<div class='chat-user'><b>Tú:</b><br>{mensaje['texto']}</div>", unsafe_allow_html=True)
         else:
-            st.markdown(f"<div class='chat-bot'><b>👑 Wanda:</b><br>{mensaje['texto']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='chat-bot'><b>👩🏻‍💼 Wanda:</b><br>{mensaje['texto']}</div>", unsafe_allow_html=True)
 
-    # Input para conversar
     nueva_consulta = st.text_area("Escribe aquí tu relato, duda o respuesta:", height=100, key="input_consultorio")
     
     col1, col2 = st.columns([3, 1])
     with col1:
         if st.button("Enviar / Consultar"):
             if nueva_consulta:
-                # Guardar mensaje de la usuaria
                 st.session_state.mensajes_consultorio.append({"rol": "usuaria", "texto": nueva_consulta})
-                
-                # Construir el contexto (memoria) para la IA
                 historial_str = ""
-                for msg in st.session_state.mensajes_consultorio[-5:]: # Recuerda los últimos 5 mensajes
+                for msg in st.session_state.mensajes_consultorio[-5:]:
                     prefijo = "Usuaria: " if msg["rol"] == "usuaria" else "Wanda: "
                     historial_str += f"{prefijo}{msg['texto']}\n"
 
-                with st.spinner("Procesando tu relato... (Puede demorar unos segundos)"):
+                with st.spinner("Procesando tu relato..."):
                     instruccion_consultorio = f"""
                     Eres Wanda Soberana. Estás en una sesión de mentoría 1 a 1 (Consultorio Soberano).
                     La usuaria te está contando situaciones de su vida, su relación con {st.session_state.perfil_el['nombre']} (Apego: {st.session_state.perfil_el['apego']}) o dudas sobre su valor y proyectos.
                     Tono: Eres una mentora cruda, validas profundamente sus emociones, le das claridad clínica sobre lo que está viviendo y la empoderas. Dialogas de tú a tú, no como un reporte.
-                    Si ella te cuenta sobre su proyecto o negocio, aliéntala a confiar en su visión por encima de las opiniones de hombres evitativos.
                     
                     HISTORIAL DE LA CHARLA RECIENTE:
                     {historial_str}
                     
                     Responde al último mensaje de la usuaria continuando la conversación de forma natural y terapéutica.
                     """
-                    
                     respuesta_wanda = llamar_gemini(nueva_consulta, instruccion_consultorio)
                     st.session_state.mensajes_consultorio.append({"rol": "wanda", "texto": respuesta_wanda})
-                    st.rerun() # Recarga la pantalla para mostrar el nuevo mensaje
+                    st.rerun()
     with col2:
         if st.button("🧹 Limpiar Charla"):
             st.session_state.mensajes_consultorio = []
