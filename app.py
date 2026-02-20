@@ -103,7 +103,8 @@ if 'mensajes_consultorio' not in st.session_state:
 
 # --- BARRA LATERAL ---
 with st.sidebar:
-    st.markdown("<div style='text-align: center; font-size: 60px;'>🌊</div>", unsafe_allow_html=True)
+    # CAMBIO REALIZADO: Se reemplazó 🌊 por 👑 para alinear con "Soberana"
+    st.markdown("<div style='text-align: center; font-size: 60px;'>👑</div>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center;'>Vínculo Nítido</h3>", unsafe_allow_html=True)
 
     if not st.session_state.logged_in:
@@ -115,7 +116,53 @@ with st.sidebar:
                 st.rerun()
             else:
                 st.error("Clave inválida. Verifica tu correo o adquiere un pase.")
+        
+        st.write("---")
+        st.markdown("<h4 style='text-align: center; color: #5EEAD4;'>💎 Adquirir Pase VIP</h4>", unsafe_allow_html=True)
+        
+        # Botón Internacional (Gumroad)
+        # RECUERDA: Reemplaza TU_LINK_DE_GUMROAD_AQUI con tu enlace real
+        st.markdown("""
+        <a href="TU_LINK_DE_GUMROAD_AQUI" target="_blank" style="text-decoration: none;">
+            <div style="background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%); color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                🌍 Pagar en Dólares (Gumroad)
+                <br><span style="font-size: 0.8em; font-weight: normal;">Entrega automática inmediata</span>
+            </div>
+        </a>
+        """, unsafe_allow_html=True)
+        
+        # Botón Local (Mercado Pago Argentina)
+        # RECUERDA: Reemplaza TU_LINK_DE_MERCADO_PAGO_AQUI con tu enlace real
+        st.markdown("""
+        <a href="TU_LINK_DE_MERCADO_PAGO_AQUI" target="_blank" style="text-decoration: none;">
+            <div style="background: rgba(255, 255, 255, 0.05); color: #5EEAD4; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #5EEAD4;">
+                🇦🇷 Pagar en Pesos (Mercado Pago)
+            </div>
+        </a>
+        """, unsafe_allow_html=True)
+        
+        st.caption("🇦🇷 Si pagas por Mercado Pago, envíame el comprobante por mensaje directo en Instagram para recibir tu clave manualmente.")
+
     else:
+        # Icono de usuaria logueada
+        st.success("👩🏻‍💼 Bienvenida, Soberana.")
+        with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
+            with st.form("perfil"):
+                p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el["nombre"])
+                p_edad = st.number_input("Edad:", value=st.session_state.perfil_el["edad"], min_value=15, max_value=90)
+                p_apego = st.selectbox("Apego:", ["No sé", "Evitativo", "Ansioso", "Seguro"], index=0)
+                p_hist = st.selectbox("Historia de Crianza:", ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
+                p_tiempo = st.text_input("Tiempo de relación:", value=st.session_state.perfil_el.get("tiempo_relacion",""))
+                
+                if st.form_submit_button("💾 Guardar Parámetros"):
+                    st.session_state.perfil_el = {
+                        "nombre": p_nombre, "edad": p_edad, "apego": p_apego, "historia": p_hist, "tiempo_relacion": p_tiempo
+                    }
+                    st.toast("Parámetros clínicos actualizados")
+        
+        if st.button("Cerrar Sesión"):
+            st.session_state.logged_in = False
+            st.rerun()
         # AQUÍ SE IMPLEMENTÓ EL CAMBIO DE ICONO Y TEXTO DE CRIANZA
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
         with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
