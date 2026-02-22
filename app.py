@@ -194,10 +194,10 @@ st.markdown("<p class='muted'>Traducción de comportamiento apoyada en neurocien
 
 tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP", "🛋️ Consultorio Soberano"])
 
-# --- TAB 1: TEST APEGO ---
+# --- TAB 1: TEST GRATIS ---
 with tab1:
     st.header("Descubre su Patrón Cerebral")
-    st.markdown("<p class='muted'>Responde estas 3 preguntas para identificar su estilo de apego (Seguro, Ansioso, Evitativo o Desorganizado).</p>", unsafe_allow_html=True)
+    st.markdown("<p class='muted'>Responde estas 3 preguntas para identificar su estilo de apego.</p>", unsafe_allow_html=True)
 
     r1 = st.radio("1. Ante la intimidad y la cercanía emocional, él:", 
         ["Se siente cómodo y confía", 
@@ -219,11 +219,35 @@ with tab1:
 
     if st.button("VER DIAGNÓSTICO"):
         st.divider()
-        # Lógica de puntuación
-        evitativo = sum([1 for r in [r1, r2, r3] if "Evitación" in r])
-        ansioso = sum([1 for r in [r1, r2, r3] if "Ansiedad" in r])
-        desorganizado = sum([1 for r in [r1, r2, r3] if "Desorganización" in r])
-        seguro = sum([1 for r in [r1, r2, r3] if "Equilibrio" in r])
+        
+        # Diccionarios ocultos para la lógica de puntuación (La usuaria no ve esto)
+        evitativo_opts = [
+            "Se agobia, pone barreras o se aleja",
+            "Castigar con el hielo (silencio) o minimizar el problema",
+            "Exige extrema autosuficiencia y resiente tus demandas"
+        ]
+        ansioso_opts = [
+            "Necesita cercanía constante y teme que lo dejes",
+            "Reclamar, explotar o culpar por miedo a perderte",
+            "Entra en pánico o sobrepiensa si tardas en responder"
+        ]
+        desorganizado_opts = [
+            "Es caótico: te busca intensamente y luego huye",
+            "Tener reacciones impredecibles y explosivas",
+            "Desconfía profundamente de ti, pero le aterra estar solo"
+        ]
+        seguro_opts = [
+            "Se siente cómodo y confía",
+            "Dialogar para buscar una solución juntos",
+            "Respeta tu espacio y disfruta el suyo sin inseguridad"
+        ]
+
+        # El motor cuenta los puntos silenciosamente
+        respuestas = [r1, r2, r3]
+        evitativo = sum([1 for r in respuestas if r in evitativo_opts])
+        ansioso = sum([1 for r in respuestas if r in ansioso_opts])
+        desorganizado = sum([1 for r in respuestas if r in desorganizado_opts])
+        seguro = sum([1 for r in respuestas if r in seguro_opts])
         
         scores = {"Evitativo": evitativo, "Ansioso-Ambivalente": ansioso, "Desorganizado": desorganizado, "Seguro": seguro}
         max_apego = max(scores, key=scores.get)
@@ -240,7 +264,6 @@ with tab1:
         else:
             st.success("✅ **APEGO SEGURO**")
             st.write("Equilibrado. Siente confianza en sí mismo y en el vínculo. Se siente cómodo con la intimidad sin temer al abandono, permitiendo una relación estable y madura.")
-
 with tab2:
     st.subheader("¿Mensaje confuso?")
     consent = st.checkbox("Acepto que este análisis es informativo, basado en patrones de comportamiento, y no sustituye terapia.")
