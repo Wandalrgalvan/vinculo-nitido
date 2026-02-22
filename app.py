@@ -122,7 +122,7 @@ with st.sidebar:
         
         # Botón Internacional (Gumroad)
         # RECUERDA: Reemplaza TU_LINK_DE_GUMROAD_AQUI con tu enlace real
-       st.write("---")
+        st.write("---")
         # Enfoque Bencivenga: Título basado en el beneficio, no en la venta.
         st.markdown("<h4 style='text-align: center; color: #5EEAD4; margin-bottom: 5px;'>🔓 Decodifica su mente</h4>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.85em; color: #94A3B8; margin-bottom: 20px;'>Accede al Laboratorio VIP y al Consultorio Soberano para traducir sus verdaderas intenciones.</p>", unsafe_allow_html=True)
