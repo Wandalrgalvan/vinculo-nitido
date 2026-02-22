@@ -122,27 +122,32 @@ with st.sidebar:
         
         # Botón Internacional (Gumroad)
         # RECUERDA: Reemplaza TU_LINK_DE_GUMROAD_AQUI con tu enlace real
+       st.write("---")
+        # Enfoque Bencivenga: Título basado en el beneficio, no en la venta.
+        st.markdown("<h4 style='text-align: center; color: #5EEAD4; margin-bottom: 5px;'>🔓 Decodifica su mente</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-size: 0.85em; color: #94A3B8; margin-bottom: 20px;'>Accede al Laboratorio VIP y al Consultorio Soberano para traducir sus verdaderas intenciones.</p>", unsafe_allow_html=True)
+        
+        # Botón Internacional (Estilo minimalista, alto valor percibido)
         st.markdown("""
         <a href="TU_LINK_DE_GUMROAD_AQUI" target="_blank" style="text-decoration: none;">
-            <div style="background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%); color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                🌍 Pagar en Dólares (Gumroad)
-                <br><span style="font-size: 0.8em; font-weight: normal;">Entrega automática inmediata</span>
+            <div style="background-color: #0F172A; border: 1px solid #14B8A6; color: white; padding: 12px; border-radius: 6px; text-align: center; transition: 0.3s; margin-bottom: 10px;">
+                <span style="font-weight: bold; font-size: 1.05em; color: #5EEAD4;">Obtener Pase VIP</span><br>
+                <span style="font-size: 0.75em; color: #94A3B8;">🌍 Pago con Tarjeta (Entrega Inmediata)</span>
             </div>
         </a>
         """, unsafe_allow_html=True)
         
-        # Botón Local (Mercado Pago Argentina)
-        # RECUERDA: Reemplaza TU_LINK_DE_MERCADO_PAGO_AQUI con tu enlace real
+        # Botón Local (Sutil, como una alternativa secundaria clara)
         st.markdown("""
         <a href="TU_LINK_DE_MERCADO_PAGO_AQUI" target="_blank" style="text-decoration: none;">
-            <div style="background: rgba(255, 255, 255, 0.05); color: #5EEAD4; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #5EEAD4;">
-                🇦🇷 Pagar en Pesos (Mercado Pago)
+            <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s;">
+                <span style="font-weight: bold; font-size: 0.9em;">🇦🇷 Opción Argentina</span><br>
+                <span style="font-size: 0.75em;">Pagar en Pesos (Mercado Pago)</span>
             </div>
         </a>
         """, unsafe_allow_html=True)
         
-        st.caption("🇦🇷 Si pagas por Mercado Pago, envíame el comprobante por mensaje directo en Instagram para recibir tu clave manualmente.")
-
+        st.markdown("<p style='text-align: center; font-size: 0.75em; color: #64748B; margin-top: 10px;'>Si usas Mercado Pago, envíame el comprobante por Instagram para habilitar tu clave.</p>", unsafe_allow_html=True)
     else:
         # Icono de usuaria logueada
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
@@ -189,20 +194,52 @@ st.markdown("<p class='muted'>Traducción de comportamiento apoyada en neurocien
 
 tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP", "🛋️ Consultorio Soberano"])
 
+# --- TAB 1: TEST APEGO ---
 with tab1:
     st.header("Descubre su Patrón Cerebral")
-    r1 = st.radio("Ante la intimidad, él:", ["Se aleja (Miedo / Sobrecarga)", "Se pone intenso (Ansiedad)", "Estable"])
-    r2 = st.radio("Ante conflictos, él:", ["Huye / Silencio", "Explota / Culpa", "Dialoga"])
+    st.markdown("<p class='muted'>Responde estas 3 preguntas para identificar su estilo de apego (Seguro, Ansioso, Evitativo o Desorganizado).</p>", unsafe_allow_html=True)
+
+    r1 = st.radio("1. Ante la intimidad y la cercanía emocional, él:", 
+        ["Se siente cómodo y confía (Equilibrio)", 
+         "Necesita cercanía constante y teme que lo dejes (Ansiedad)", 
+         "Se agobia, pone barreras o se aleja (Evitación)", 
+         "Es caótico: te busca intensamente y luego huye (Desorganización)"])
+    
+    r2 = st.radio("2. Durante un conflicto o discusión, él suele:", 
+        ["Dialogar para buscar una solución juntos (Equilibrio)", 
+         "Reclamar, explotar o culpar por miedo a perderte (Ansiedad)", 
+         "Castigar con el hielo (silencio) o minimizar el problema (Evitación)", 
+         "Tener reacciones impredecibles y explosivas (Desorganización)"])
+         
+    r3 = st.radio("3. Respecto a la independencia y el espacio personal:", 
+        ["Respeta tu espacio y disfruta el suyo sin inseguridad (Equilibrio)", 
+         "Entra en pánico o sobrepiensa si tardas en responder (Ansiedad)", 
+         "Exige extrema autosuficiencia y resiente tus demandas (Evitación)", 
+         "Desconfía profundamente de ti, pero le aterra estar solo (Desorganización)"])
+
     if st.button("VER DIAGNÓSTICO"):
         st.divider()
-        if "aleja" in r1 or "Huye" in r2:
+        # Lógica de puntuación
+        evitativo = sum([1 for r in [r1, r2, r3] if "Evitación" in r])
+        ansioso = sum([1 for r in [r1, r2, r3] if "Ansiedad" in r])
+        desorganizado = sum([1 for r in [r1, r2, r3] if "Desorganización" in r])
+        seguro = sum([1 for r in [r1, r2, r3] if "Equilibrio" in r])
+        
+        scores = {"Evitativo": evitativo, "Ansioso-Ambivalente": ansioso, "Desorganizado": desorganizado, "Seguro": seguro}
+        max_apego = max(scores, key=scores.get)
+        
+        if max_apego == "Evitativo":
             st.error("❄️ **APEGO EVITATIVO**")
-            st.write("Su cerebro asocia la cercanía emocional con pérdida de libertad. El contacto activa respuestas de huida.")
-        elif "intenso" in r1 or "Explota" in r2:
-            st.warning("🔥 **APEGO ANSIOSO**")
-            st.write("Su intensidad nace del miedo al abandono. Hiperactividad en la amígdala cerebral.")
+            st.write("Rechaza la intimidad emocional y muestra una autosuficiencia extrema. Su cerebro asocia la cercanía con pérdida de libertad. El contacto profundo activa sus respuestas de huida o distanciamiento.")
+        elif max_apego == "Ansioso-Ambivalente":
+            st.warning("🔥 **APEGO ANSIOSO-AMBIVALENTE**")
+            st.write("Siente una fuerte necesidad de cercanía y preocupación constante por el rechazo. Su intensidad y conductas demandantes nacen del miedo al abandono y una hiperactividad en la amígdala cerebral.")
+        elif max_apego == "Desorganizado":
+            st.error("🌪️ **APEGO DESORGANIZADO**")
+            st.write("Una mezcla de ansiedad y evitación, a menudo ligada a traumas o negligencia en la infancia. Presenta comportamientos contradictorios: anhela la intimidad pero le aterra, generando un caos vincular entre el deseo y la huida.")
         else:
             st.success("✅ **APEGO SEGURO**")
+            st.write("Equilibrado. Siente confianza en sí mismo y en el vínculo. Se siente cómodo con la intimidad sin temer al abandono, permitiendo una relación estable y madura.")
 
 with tab2:
     st.subheader("¿Mensaje confuso?")
