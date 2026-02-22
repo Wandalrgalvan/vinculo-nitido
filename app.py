@@ -200,22 +200,22 @@ with tab1:
     st.markdown("<p class='muted'>Responde estas 3 preguntas para identificar su estilo de apego (Seguro, Ansioso, Evitativo o Desorganizado).</p>", unsafe_allow_html=True)
 
     r1 = st.radio("1. Ante la intimidad y la cercanía emocional, él:", 
-        ["Se siente cómodo y confía (Equilibrio)", 
-         "Necesita cercanía constante y teme que lo dejes (Ansiedad)", 
-         "Se agobia, pone barreras o se aleja (Evitación)", 
-         "Es caótico: te busca intensamente y luego huye (Desorganización)"])
+        ["Se siente cómodo y confía", 
+         "Necesita cercanía constante y teme que lo dejes", 
+         "Se agobia, pone barreras o se aleja", 
+         "Es caótico: te busca intensamente y luego huye"])
     
     r2 = st.radio("2. Durante un conflicto o discusión, él suele:", 
-        ["Dialogar para buscar una solución juntos (Equilibrio)", 
-         "Reclamar, explotar o culpar por miedo a perderte (Ansiedad)", 
-         "Castigar con el hielo (silencio) o minimizar el problema (Evitación)", 
-         "Tener reacciones impredecibles y explosivas (Desorganización)"])
+        ["Dialogar para buscar una solución juntos", 
+         "Reclamar, explotar o culpar por miedo a perderte", 
+         "Castigar con el hielo (silencio) o minimizar el problema", 
+         "Tener reacciones impredecibles y explosivas"])
          
     r3 = st.radio("3. Respecto a la independencia y el espacio personal:", 
-        ["Respeta tu espacio y disfruta el suyo sin inseguridad (Equilibrio)", 
-         "Entra en pánico o sobrepiensa si tardas en responder (Ansiedad)", 
-         "Exige extrema autosuficiencia y resiente tus demandas (Evitación)", 
-         "Desconfía profundamente de ti, pero le aterra estar solo (Desorganización)"])
+        ["Respeta tu espacio y disfruta el suyo sin inseguridad", 
+         "Entra en pánico o sobrepiensa si tardas en responder", 
+         "Exige extrema autosuficiencia y resiente tus demandas", 
+         "Desconfía profundamente de ti, pero le aterra estar solo"])
 
     if st.button("VER DIAGNÓSTICO"):
         st.divider()
