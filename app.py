@@ -157,7 +157,7 @@ with st.sidebar:
                 
                 lista_hist = ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"]
                 hist_actual = st.session_state.perfil_el.get("historia", "No sé")
-                idx_hist = lista_hist.index(hist_actual) if hist_actual in lista_hist: else 0
+                idx_hist = lista_hist.index(hist_actual) if hist_actual in lista_hist else 0
                 p_hist = st.selectbox("Historia de Crianza:", lista_hist, index=idx_hist)
                 
                 p_tiempo = st.text_input("Tiempo de relación:", value=st.session_state.perfil_el.get("tiempo_relacion",""))
