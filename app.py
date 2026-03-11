@@ -19,26 +19,28 @@ st.markdown("""
     }
     .stButton>button:hover { filter: brightness(1.1); }
     
-    /* FIX DEFINITIVO: Cajas de texto y Selectores adaptados para celular */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border: 1px solid #334155; border-radius: 6px;
+    /* FIX SÚPER DEFINITIVO: Anular los puntos suspensivos en TODO el selector */
+    div[data-testid="stSelectbox"] * {
+        white-space: normal !important;
+        text-overflow: unset !important;
     }
     
-    /* Arregla el texto seleccionado DENTRO de la cajita principal */
-    div[data-baseweb="select"] > div, div[data-baseweb="select"] span {
+    /* Capa fantasma de la lista desplegable */
+    div[data-baseweb="popover"] ul, div[data-baseweb="popover"] li, ul[role="listbox"] li {
         white-space: normal !important;
         word-wrap: break-word !important;
-        text-overflow: clip !important;
-    }
-    
-    /* Arregla el texto en la LISTA DESPLEGABLE (la capa flotante) */
-    div[data-baseweb="popover"] li {
-        white-space: normal !important;
-        word-wrap: break-word !important;
+        text-overflow: unset !important;
         height: auto !important;
-        min-height: 40px !important;
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
+        min-height: 2.5rem !important;
+    }
+
+    /* Achicamos un milímetro la letra de las cajitas para que el celular no sufra */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input, div[data-baseweb="select"] {
+        background-color: rgba(255, 255, 255, 0.05) !important; 
+        color: white !important; 
+        border: 1px solid #334155; 
+        border-radius: 6px;
+        font-size: 0.85em !important; 
     }
     
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -371,3 +373,7 @@ with tab4:
 
 st.markdown("---")
 st.markdown("<div class='muted'>Vínculo Nítido © 2026 | Metodología Soberana</div>", unsafe_allow_html=True)
+ 
+
+
+       
