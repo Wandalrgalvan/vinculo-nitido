@@ -8,9 +8,19 @@ st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="cent
 
 st.markdown("""
     <style>
-    /* Paleta Océano Clínico */
-    .stApp { background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); color: #F8FAFC; }
-    h1, h2, h3 { color: #5EEAD4 !important; font-weight: 300; }
+    /* Importar fuentes súper legibles (Sans-Serif) */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap');
+
+    /* Paleta Océano Clínico y Tipografía Base */
+    .stApp { background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); color: #F8FAFC; font-family: 'Roboto', sans-serif; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; color: #5EEAD4 !important; font-weight: 600; }
+    
+    /* FIX 1: Botones de opciones del test legibles (Blanco puro y fuente limpia) */
+    .stRadio label p { color: #FFFFFF !important; font-size: 1.05em !important; font-family: 'Roboto', sans-serif !important; }
+    
+    /* FIX 2: Aclarar el texto gris para evitar fatiga visual */
+    .muted { color: #E2E8F0; font-size: 0.95em; }
+    
     .stButton>button {
         background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);
         color: #FFFFFF; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
@@ -23,7 +33,6 @@ st.markdown("""
     .chat-user { background: rgba(20, 184, 166, 0.1); padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; }
     .chat-bot { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; }
     .blur-text { filter: blur(5px); opacity: 0.6; pointer-events: none; }
-    .muted { color: #94A3B8; font-size: 0.85em; }
     .vip-title { color: #D4AF37 !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -103,7 +112,6 @@ if 'mensajes_consultorio' not in st.session_state:
 
 # --- BARRA LATERAL ---
 with st.sidebar:
-    # CAMBIO REALIZADO: Se reemplazó 🌊 por 👑 para alinear con "Soberana"
     st.markdown("<div style='text-align: center; font-size: 60px;'>👑</div>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center;'>Vínculo Nítido</h3>", unsafe_allow_html=True)
 
@@ -120,27 +128,23 @@ with st.sidebar:
         st.write("---")
         st.markdown("<h4 style='text-align: center; color: #5EEAD4;'>💎 Adquirir Pase VIP</h4>", unsafe_allow_html=True)
         
-        # Botón Internacional (Gumroad)
-        # RECUERDA: Reemplaza TU_LINK_DE_GUMROAD_AQUI con tu enlace real
         st.write("---")
-        # Enfoque Bencivenga: Título basado en el beneficio, no en la venta.
         st.markdown("<h4 style='text-align: center; color: #5EEAD4; margin-bottom: 5px;'>🔓 Decodifica su mente</h4>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.85em; color: #94A3B8; margin-bottom: 20px;'>Accede al Laboratorio VIP y al Consultorio Soberano para traducir sus verdaderas intenciones.</p>", unsafe_allow_html=True)
         
-        # Botón Internacional (Estilo minimalista, alto valor percibido)
+        # FIX 3: Botones VIP ajustados para que no se desborden en el celular
         st.markdown("""
-        <a href="TU_LINK_DE_GUMROAD_AQUI" target="_blank" style="text-decoration: none;">
-            <div style="background-color: #0F172A; border: 1px solid #14B8A6; color: white; padding: 12px; border-radius: 6px; text-align: center; transition: 0.3s; margin-bottom: 10px;">
+        <a href="TU_LINK_DE_GUMROAD_AQUI" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
+            <div style="background-color: #0F172A; border: 1px solid #14B8A6; color: white; padding: 12px; border-radius: 6px; text-align: center; transition: 0.3s; margin-bottom: 10px; word-wrap: break-word;">
                 <span style="font-weight: bold; font-size: 1.05em; color: #5EEAD4;">Obtener Pase VIP</span><br>
                 <span style="font-size: 0.75em; color: #94A3B8;">🌍 Pago con Tarjeta (Entrega Inmediata)</span>
             </div>
         </a>
         """, unsafe_allow_html=True)
         
-        # Botón Local (Sutil, como una alternativa secundaria clara)
         st.markdown("""
-        <a href="TU_LINK_DE_MERCADO_PAGO_AQUI" target="_blank" style="text-decoration: none;">
-            <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s;">
+        <a href="TU_LINK_DE_MERCADO_PAGO_AQUI" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
+            <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s; word-wrap: break-word;">
                 <span style="font-weight: bold; font-size: 0.9em;">🇦🇷 Opción Argentina</span><br>
                 <span style="font-size: 0.75em;">Pagar en Pesos (Mercado Pago)</span>
             </div>
@@ -149,26 +153,6 @@ with st.sidebar:
         
         st.markdown("<p style='text-align: center; font-size: 0.75em; color: #64748B; margin-top: 10px;'>Si usas Mercado Pago, envíame el comprobante por Instagram para habilitar tu clave.</p>", unsafe_allow_html=True)
     else:
-        # Icono de usuaria logueada
-        st.success("👩🏻‍💼 Bienvenida, Soberana.")
-        with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
-            with st.form("perfil"):
-                p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el["nombre"])
-                p_edad = st.number_input("Edad:", value=st.session_state.perfil_el["edad"], min_value=15, max_value=90)
-                p_apego = st.selectbox("Apego:", ["No sé", "Evitativo", "Ansioso", "Seguro"], index=0)
-                p_hist = st.selectbox("Historia de Crianza:", ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
-                p_tiempo = st.text_input("Tiempo de relación:", value=st.session_state.perfil_el.get("tiempo_relacion",""))
-                
-                if st.form_submit_button("💾 Guardar Parámetros"):
-                    st.session_state.perfil_el = {
-                        "nombre": p_nombre, "edad": p_edad, "apego": p_apego, "historia": p_hist, "tiempo_relacion": p_tiempo
-                    }
-                    st.toast("Parámetros clínicos actualizados")
-        
-        if st.button("Cerrar Sesión"):
-            st.session_state.logged_in = False
-            st.rerun()
-        # AQUÍ SE IMPLEMENTÓ EL CAMBIO DE ICONO Y TEXTO DE CRIANZA
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
         with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
             with st.form("perfil"):
@@ -190,7 +174,10 @@ with st.sidebar:
 
 # --- PANTALLA PRINCIPAL ---
 st.title("Vínculo Nítido")
-st.markdown("<p class='muted'>Traducción de comportamiento apoyada en neurociencia.</p>", unsafe_allow_html=True)
+
+# FIX 4: Pauta inicial explícita para ubicar al usuario inmediatamente
+st.markdown("<h3 style='color: #F8FAFC !important; font-size: 1.2em; margin-top: -15px;'>🧠 Decodifica la mente de tu pareja (o casi algo)</h3>", unsafe_allow_html=True)
+st.markdown("<p class='muted'>Traducción de comportamiento en el amor, apoyada en neurociencia.</p>", unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "🔥 Laboratorio VIP", "🛋️ Consultorio Soberano"])
 
@@ -220,7 +207,6 @@ with tab1:
     if st.button("VER DIAGNÓSTICO"):
         st.divider()
         
-        # Diccionarios ocultos para la lógica de puntuación (La usuaria no ve esto)
         evitativo_opts = [
             "Se agobia, pone barreras o se aleja",
             "Castigar con el hielo (silencio) o minimizar el problema",
@@ -242,7 +228,6 @@ with tab1:
             "Respeta tu espacio y disfruta el suyo sin inseguridad"
         ]
 
-        # El motor cuenta los puntos silenciosamente
         respuestas = [r1, r2, r3]
         evitativo = sum([1 for r in respuestas if r in evitativo_opts])
         ansioso = sum([1 for r in respuestas if r in ansioso_opts])
@@ -264,6 +249,7 @@ with tab1:
         else:
             st.success("✅ **APEGO SEGURO**")
             st.write("Equilibrado. Siente confianza en sí mismo y en el vínculo. Se siente cómodo con la intimidad sin temer al abandono, permitiendo una relación estable y madura.")
+
 with tab2:
     st.subheader("¿Mensaje confuso?")
     consent = st.checkbox("Acepto que este análisis es informativo, basado en patrones de comportamiento, y no sustituye terapia.")
