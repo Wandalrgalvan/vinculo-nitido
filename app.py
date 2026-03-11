@@ -8,26 +8,18 @@ st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="cent
 
 st.markdown("""
     <style>
-    /* Importar fuentes súper legibles (Sans-Serif) */
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap');
-
-    /* Paleta Océano Clínico y Tipografía Base */
     .stApp { background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); color: #F8FAFC; font-family: 'Roboto', sans-serif; }
     h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; color: #5EEAD4 !important; font-weight: 600; }
-    
-    /* FIX 1: Botones de opciones del test legibles (Blanco puro y fuente limpia) */
     .stRadio label p { color: #FFFFFF !important; font-size: 1.05em !important; font-family: 'Roboto', sans-serif !important; }
-    
-    /* FIX 2: Aclarar el texto gris para evitar fatiga visual */
     .muted { color: #E2E8F0; font-size: 0.95em; }
-    
     .stButton>button {
         background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);
         color: #FFFFFF; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
     }
-    .stButton>button:hover { filter: brightness(1.1); }
+    /* FIX 5: Caja de texto del chat con fondo oscuro fijo para que resalte la letra blanca */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div, .stNumberInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border: 1px solid #334155; border-radius: 6px;
+    background-color: #1E293B !important; color: #FFFFFF !important; border: 1px solid #5EEAD4; border-radius: 6px;
     }
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .chat-user { background: rgba(20, 184, 166, 0.1); padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; }
@@ -37,7 +29,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- VIP KEYS (50 Claves generadas para Venta) ---
+# --- VIP KEYS ---
 VIP_KEYS = [
     "a1b2c3d4-e5f6-4789-a012-3456789abcde", "98765432-10fe-dcba-9876-543210fedcba",
     "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d", "f1e2d3c4-b5a6-7890-1234-56789abcdef0",
@@ -127,12 +119,10 @@ with st.sidebar:
         
         st.write("---")
         st.markdown("<h4 style='text-align: center; color: #5EEAD4;'>💎 Adquirir Pase VIP</h4>", unsafe_allow_html=True)
-        
         st.write("---")
         st.markdown("<h4 style='text-align: center; color: #5EEAD4; margin-bottom: 5px;'>🔓 Decodifica su mente</h4>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.85em; color: #94A3B8; margin-bottom: 20px;'>Accede al Laboratorio VIP y al Consultorio Soberano para traducir sus verdaderas intenciones.</p>", unsafe_allow_html=True)
         
-        # FIX 3: Botones VIP ajustados para que no se desborden en el celular
         st.markdown("""
         <a href="TU_LINK_DE_GUMROAD_AQUI" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
             <div style="background-color: #0F172A; border: 1px solid #14B8A6; color: white; padding: 12px; border-radius: 6px; text-align: center; transition: 0.3s; margin-bottom: 10px; word-wrap: break-word;">
@@ -156,17 +146,27 @@ with st.sidebar:
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
         with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
             with st.form("perfil"):
-                p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el["nombre"])
-                p_edad = st.number_input("Edad:", value=st.session_state.perfil_el["edad"], min_value=15, max_value=90)
-                p_apego = st.selectbox("Apego:", ["No sé", "Evitativo", "Ansioso", "Seguro"], index=0)
-                p_hist = st.selectbox("Historia de Crianza:", ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"], index=0)
+                # REPARACIÓN: Memoria de los campos del formulario
+                p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el.get("nombre", ""))
+                p_edad = st.number_input("Edad:", value=st.session_state.perfil_el.get("edad", 30), min_value=15, max_value=90)
+                
+                lista_apegos = ["No sé", "Evitativo", "Ansioso", "Seguro"]
+                apego_actual = st.session_state.perfil_el.get("apego", "No sé")
+                idx_apego = lista_apegos.index(apego_actual) if apego_actual in lista_apegos else 0
+                p_apego = st.selectbox("Apego:", lista_apegos, index=idx_apego)
+                
+                lista_hist = ["No sé", "Padres Divorciados", "Padre Ausente", "Violencia", "Narcisismo"]
+                hist_actual = st.session_state.perfil_el.get("historia", "No sé")
+                idx_hist = lista_hist.index(hist_actual) if hist_actual in lista_hist: else 0
+                p_hist = st.selectbox("Historia de Crianza:", lista_hist, index=idx_hist)
+                
                 p_tiempo = st.text_input("Tiempo de relación:", value=st.session_state.perfil_el.get("tiempo_relacion",""))
                 
                 if st.form_submit_button("💾 Guardar Parámetros"):
                     st.session_state.perfil_el = {
                         "nombre": p_nombre, "edad": p_edad, "apego": p_apego, "historia": p_hist, "tiempo_relacion": p_tiempo
                     }
-                    st.toast("Parámetros clínicos actualizados")
+                    st.rerun() # REPARACIÓN: Refrescar pantalla de inmediato al guardar
         
         if st.button("Cerrar Sesión"):
             st.session_state.logged_in = False
@@ -174,8 +174,6 @@ with st.sidebar:
 
 # --- PANTALLA PRINCIPAL ---
 st.title("Vínculo Nítido")
-
-# FIX 4: Pauta inicial explícita para ubicar al usuario inmediatamente
 st.markdown("<h3 style='color: #F8FAFC !important; font-size: 1.2em; margin-top: -15px;'>🧠 Decodifica la mente de tu pareja (o casi algo)</h3>", unsafe_allow_html=True)
 st.markdown("<p class='muted'>Traducción de comportamiento en el amor, apoyada en neurociencia.</p>", unsafe_allow_html=True)
 
@@ -206,7 +204,6 @@ with tab1:
 
     if st.button("VER DIAGNÓSTICO"):
         st.divider()
-        
         evitativo_opts = [
             "Se agobia, pone barreras o se aleja",
             "Castigar con el hielo (silencio) o minimizar el problema",
@@ -275,7 +272,12 @@ with tab3:
         st.stop()
 
     perfil = st.session_state.perfil_el
-    st.success(f"🔓 Laboratorio Clínico | Analizando a: {perfil.get('nombre','Sujeto')} ({perfil.get('edad','?')} años)")
+    # REPARACIÓN: Si el nombre está vacío, mostrar "Sujeto" en vez de espacio en blanco
+    nombre_mostrar = perfil.get('nombre', '').strip()
+    if not nombre_mostrar:
+        nombre_mostrar = "Sujeto"
+        
+    st.success(f"🔓 Laboratorio Clínico | Analizando a: {nombre_mostrar} ({perfil.get('edad', 30)} años)")
 
     chat = st.text_area("Pega la interacción de texto completa (WhatsApp/Redes):", height=200)
     if st.button("✨ INICIAR PROTOCOLO DE DECODIFICACIÓN"):
@@ -286,12 +288,13 @@ with tab3:
                 instruccion = f"""
                 Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en Neurociencia y Apego. 
                 Tu análisis debe ser científico, crudo pero profundamente empático con la usuaria. NUNCA digas que eres IA.
-                Sujeto a analizar: {perfil.get('nombre','[sin nombre]')}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia de Crianza: {perfil.get('historia','No sé')}.
+                Sujeto a analizar: {nombre_mostrar}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia de Crianza: {perfil.get('historia','No sé')}.
                 
                 Devuelve exactamente 3 bloques usando Markdown:
                 1. 🧬 QUÍMICA CEREBRAL: Explica sus niveles de dopamina/cortisol frente a la interacción.
                 2. 👁️ TRADUCCIÓN NÍTIDA: Qué dice él vs. Qué dictan sus intenciones reales de control/apego.
                 3. 👑 ESTRATEGIA SOBERANA: Qué debe responder la usuaria exactamente para recuperar el poder.
+                ATENCIÓN EN LA ESTRATEGIA: Si notas que el vínculo no tiene etiquetas, es complejo, o la usuaria demuestra ser una mujer libre que no busca encasillar la relación, NO sugieras ultimátums rígidos, portazos formales ni reclamos de "transparencia". Tu estrategia debe basarse en el humor, la ironía fina, la soltura y el desapego emocional. Enséñale a sostener su energía intacta dejando que él lidie solo con su miedo a la intimidad.
                 """
                 salida = llamar_gemini(chat, instruccion)
                 st.markdown("<div class='result-box'>", unsafe_allow_html=True)
@@ -325,15 +328,23 @@ with tab4:
                     historial_str += f"{prefijo}{msg['texto']}\n"
 
                 with st.spinner("Procesando tu relato..."):
+                    nombre_consultorio = st.session_state.perfil_el.get('nombre', '').strip() or "el sujeto"
                     instruccion_consultorio = f"""
                     Eres Wanda Soberana. Estás en una sesión de mentoría 1 a 1 (Consultorio Soberano).
-                    La usuaria te está contando situaciones de su vida, su relación con {st.session_state.perfil_el['nombre']} (Apego: {st.session_state.perfil_el['apego']}) o dudas sobre su valor y proyectos.
+                    La usuaria te está contando situaciones de su vida, su relación con {nombre_consultorio} (Apego: {st.session_state.perfil_el.get('apego', 'No sé')}) o dudas sobre su valor y proyectos.
                     Tono: Eres una mentora cruda, validas profundamente sus emociones, le das claridad clínica sobre lo que está viviendo y la empoderas. Dialogas de tú a tú, no como un reporte.
+                    
+                    🚨 PROTOCOLO DE EMERGENCIA (TOLERANCIA CERO A LA VIOLENCIA):
+                    Si en el relato de la usuaria detectas CUALQUIER indicio de violencia física, violencia psicológica grave, manipulación coercitiva, gaslighting extremo, amenazas, toxicidad abusiva o peligro:
+                    1. ABANDONA INMEDIATAMENTE el análisis de apego. No justifiques las acciones del hombre bajo ninguna teoría neurocientífica ni trauma infantil.
+                    2. Cambia a un tono de contención absoluta, protectora, sorora y muy firme.
+                    3. Llama a la violencia por su nombre explícitamente (ej: "Mi reina, esto no es apego evitativo, esto es violencia psicológica y manipulación").
+                    4. OBLIGATORIO: Ofrécele ayuda concreta. Sugiérele que llame a la Línea 144 (Atención gratuita por violencia de género en Argentina) o busque a su red de apoyo más cercana. Dile que su seguridad e integridad son la prioridad absoluta ahora mismo.
                     
                     HISTORIAL DE LA CHARLA RECIENTE:
                     {historial_str}
                     
-                    Responde al último mensaje de la usuaria continuando la conversación de forma natural y terapéutica.
+                    Responde al último mensaje de la usuaria siguiendo estas pautas.
                     """
                     respuesta_wanda = llamar_gemini(nueva_consulta, instruccion_consultorio)
                     st.session_state.mensajes_consultorio.append({"rol": "wanda", "texto": respuesta_wanda})
