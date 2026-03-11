@@ -17,10 +17,20 @@ st.markdown("""
         background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);
         color: #FFFFFF; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
     }
-    /* FIX 5: Caja de texto del chat con fondo oscuro fijo para que resalte la letra blanca */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div, .stNumberInput>div>div>input {
-    background-color: #1E293B !important; color: #FFFFFF !important; border: 1px solid #5EEAD4; border-radius: 6px;
+    .stButton>button:hover { filter: brightness(1.1); }
+    
+    /* FIX: Cajas de texto y Selectores adaptados para celular sin cortar el texto */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border: 1px solid #334155; border-radius: 6px;
     }
+    div[data-baseweb="select"] > div {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: white !important;
+        border: 1px solid #334155 !important;
+        border-radius: 6px !important;
+        white-space: normal !important; /* Evita que el texto se corte con puntos suspensivos */
+    }
+    
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .chat-user { background: rgba(20, 184, 166, 0.1); padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; }
     .chat-bot { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; }
@@ -96,7 +106,7 @@ def llamar_gemini(prompt, system_instruction):
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'perfil_el' not in st.session_state:
-    st.session_state.perfil_el = {"nombre": "", "edad": 30, "apego": "No sé", "historia": "No sé", "tiempo_relacion": ""}
+    st.session_state.perfil_el = {"nombre": "", "edad": 30, "tipo_relacion": "No sé", "apego": "No sé", "historia": "No sé", "tiempo_relacion": ""}
 if 'consent' not in st.session_state:
     st.session_state.consent = False
 if 'mensajes_consultorio' not in st.session_state:
@@ -146,9 +156,14 @@ with st.sidebar:
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
         with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
             with st.form("perfil"):
-                # REPARACIÓN: Memoria de los campos del formulario
                 p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el.get("nombre", ""))
                 p_edad = st.number_input("Edad:", value=st.session_state.perfil_el.get("edad", 30), min_value=15, max_value=90)
+                
+                # NUEVO APARTADO: Tipo de Relación
+                lista_tipos = ["No sé", "Casados", "Novios", "Amantes", "Casi algo", "Ex pareja", "Contacto Cero"]
+                tipo_actual = st.session_state.perfil_el.get("tipo_relacion", "No sé")
+                idx_tipo = lista_tipos.index(tipo_actual) if tipo_actual in lista_tipos else 0
+                p_tipo = st.selectbox("Tipo de Vínculo:", lista_tipos, index=idx_tipo)
                 
                 lista_apegos = ["No sé", "Evitativo", "Ansioso", "Seguro"]
                 apego_actual = st.session_state.perfil_el.get("apego", "No sé")
@@ -164,9 +179,9 @@ with st.sidebar:
                 
                 if st.form_submit_button("💾 Guardar Parámetros"):
                     st.session_state.perfil_el = {
-                        "nombre": p_nombre, "edad": p_edad, "apego": p_apego, "historia": p_hist, "tiempo_relacion": p_tiempo
+                        "nombre": p_nombre, "edad": p_edad, "tipo_relacion": p_tipo, "apego": p_apego, "historia": p_hist, "tiempo_relacion": p_tiempo
                     }
-                    st.rerun() # REPARACIÓN: Refrescar pantalla de inmediato al guardar
+                    st.rerun() 
         
         if st.button("Cerrar Sesión"):
             st.session_state.logged_in = False
@@ -272,12 +287,11 @@ with tab3:
         st.stop()
 
     perfil = st.session_state.perfil_el
-    # REPARACIÓN: Si el nombre está vacío, mostrar "Sujeto" en vez de espacio en blanco
     nombre_mostrar = perfil.get('nombre', '').strip()
     if not nombre_mostrar:
         nombre_mostrar = "Sujeto"
         
-    st.success(f"🔓 Laboratorio Clínico | Analizando a: {nombre_mostrar} ({perfil.get('edad', 30)} años)")
+    st.success(f"🔓 Laboratorio Clínico | Analizando a: {nombre_mostrar} ({perfil.get('edad', 30)} años) | {perfil.get('tipo_relacion', '')}")
 
     chat = st.text_area("Pega la interacción de texto completa (WhatsApp/Redes):", height=200)
     if st.button("✨ INICIAR PROTOCOLO DE DECODIFICACIÓN"):
@@ -288,13 +302,12 @@ with tab3:
                 instruccion = f"""
                 Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en Neurociencia y Apego. 
                 Tu análisis debe ser científico, crudo pero profundamente empático con la usuaria. NUNCA digas que eres IA.
-                Sujeto a analizar: {nombre_mostrar}, Edad: {perfil.get('edad', 30)}, Apego: {perfil.get('apego','No sé')}, Historia de Crianza: {perfil.get('historia','No sé')}.
+                Sujeto a analizar: {nombre_mostrar}, Edad: {perfil.get('edad', 30)}, Tipo de Vínculo: {perfil.get('tipo_relacion', 'No sé')}, Apego: {perfil.get('apego','No sé')}, Historia de Crianza: {perfil.get('historia','No sé')}.
                 
                 Devuelve exactamente 3 bloques usando Markdown:
                 1. 🧬 QUÍMICA CEREBRAL: Explica sus niveles de dopamina/cortisol frente a la interacción.
                 2. 👁️ TRADUCCIÓN NÍTIDA: Qué dice él vs. Qué dictan sus intenciones reales de control/apego.
                 3. 👑 ESTRATEGIA SOBERANA: Qué debe responder la usuaria exactamente para recuperar el poder.
-                ATENCIÓN EN LA ESTRATEGIA: Si notas que el vínculo no tiene etiquetas, es complejo, o la usuaria demuestra ser una mujer libre que no busca encasillar la relación, NO sugieras ultimátums rígidos, portazos formales ni reclamos de "transparencia". Tu estrategia debe basarse en el humor, la ironía fina, la soltura y el desapego emocional. Enséñale a sostener su energía intacta dejando que él lidie solo con su miedo a la intimidad.
                 """
                 salida = llamar_gemini(chat, instruccion)
                 st.markdown("<div class='result-box'>", unsafe_allow_html=True)
@@ -331,20 +344,13 @@ with tab4:
                     nombre_consultorio = st.session_state.perfil_el.get('nombre', '').strip() or "el sujeto"
                     instruccion_consultorio = f"""
                     Eres Wanda Soberana. Estás en una sesión de mentoría 1 a 1 (Consultorio Soberano).
-                    La usuaria te está contando situaciones de su vida, su relación con {nombre_consultorio} (Apego: {st.session_state.perfil_el.get('apego', 'No sé')}) o dudas sobre su valor y proyectos.
+                    La usuaria te está contando situaciones de su vida, su relación con {nombre_consultorio} (Tipo de Vínculo: {st.session_state.perfil_el.get('tipo_relacion', 'No sé')}, Apego: {st.session_state.perfil_el.get('apego', 'No sé')}) o dudas sobre su valor y proyectos.
                     Tono: Eres una mentora cruda, validas profundamente sus emociones, le das claridad clínica sobre lo que está viviendo y la empoderas. Dialogas de tú a tú, no como un reporte.
-                    
-                    🚨 PROTOCOLO DE EMERGENCIA (TOLERANCIA CERO A LA VIOLENCIA):
-                    Si en el relato de la usuaria detectas CUALQUIER indicio de violencia física, violencia psicológica grave, manipulación coercitiva, gaslighting extremo, amenazas, toxicidad abusiva o peligro:
-                    1. ABANDONA INMEDIATAMENTE el análisis de apego. No justifiques las acciones del hombre bajo ninguna teoría neurocientífica ni trauma infantil.
-                    2. Cambia a un tono de contención absoluta, protectora, sorora y muy firme.
-                    3. Llama a la violencia por su nombre explícitamente (ej: "Mi reina, esto no es apego evitativo, esto es violencia psicológica y manipulación").
-                    4. OBLIGATORIO: Ofrécele ayuda concreta. Sugiérele que llame a la Línea 144 (Atención gratuita por violencia de género en Argentina) o busque a su red de apoyo más cercana. Dile que su seguridad e integridad son la prioridad absoluta ahora mismo.
                     
                     HISTORIAL DE LA CHARLA RECIENTE:
                     {historial_str}
                     
-                    Responde al último mensaje de la usuaria siguiendo estas pautas.
+                    Responde al último mensaje de la usuaria continuando la conversación de forma natural y terapéutica.
                     """
                     respuesta_wanda = llamar_gemini(nueva_consulta, instruccion_consultorio)
                     st.session_state.mensajes_consultorio.append({"rol": "wanda", "texto": respuesta_wanda})
