@@ -19,16 +19,26 @@ st.markdown("""
     }
     .stButton>button:hover { filter: brightness(1.1); }
     
-    /* FIX: Cajas de texto y Selectores adaptados para celular sin cortar el texto */
+    /* FIX DEFINITIVO: Cajas de texto y Selectores adaptados para celular */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input {
         background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border: 1px solid #334155; border-radius: 6px;
     }
-    div[data-baseweb="select"] > div {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: white !important;
-        border: 1px solid #334155 !important;
-        border-radius: 6px !important;
-        white-space: normal !important; /* Evita que el texto se corte con puntos suspensivos */
+    
+    /* Arregla el texto seleccionado DENTRO de la cajita principal */
+    div[data-baseweb="select"] > div, div[data-baseweb="select"] span {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        text-overflow: clip !important;
+    }
+    
+    /* Arregla el texto en la LISTA DESPLEGABLE (la capa flotante) */
+    div[data-baseweb="popover"] li {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        height: auto !important;
+        min-height: 40px !important;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
     }
     
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -159,7 +169,6 @@ with st.sidebar:
                 p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el.get("nombre", ""))
                 p_edad = st.number_input("Edad:", value=st.session_state.perfil_el.get("edad", 30), min_value=15, max_value=90)
                 
-                # NUEVO APARTADO: Tipo de Relación
                 lista_tipos = ["No sé", "Casados", "Novios", "Amantes", "Casi algo", "Ex pareja", "Contacto Cero"]
                 tipo_actual = st.session_state.perfil_el.get("tipo_relacion", "No sé")
                 idx_tipo = lista_tipos.index(tipo_actual) if tipo_actual in lista_tipos else 0
