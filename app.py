@@ -19,17 +19,27 @@ st.markdown("""
     }
     .stButton>button:hover { filter: brightness(1.1); }
     
-    /* FIX DE TEXTOS LARGOS: Anular los puntos suspensivos */
-    div[data-testid="stSelectbox"] * {
-        white-space: normal !important;
-        text-overflow: unset !important;
+    /* FIX DE TEXTOS LARGOS: Forzar salto de línea sin romper la barra */
+    div[data-baseweb="select"] > div:first-child {
+        height: auto !important;
+        min-height: 38px !important;
     }
-    div[data-baseweb="popover"] ul, div[data-baseweb="popover"] li, ul[role="listbox"] li {
+    div[data-baseweb="select"] span {
         white-space: normal !important;
         word-wrap: break-word !important;
-        text-overflow: unset !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        display: block !important;
+        line-height: 1.3 !important;
+    }
+    ul[role="listbox"] li {
+        white-space: normal !important;
+        word-wrap: break-word !important;
         height: auto !important;
-        min-height: 2.5rem !important;
+        min-height: 40px !important;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        line-height: 1.3 !important;
     }
 
     /* Ajuste de cajitas */
@@ -39,14 +49,6 @@ st.markdown("""
         border: 1px solid #334155; 
         border-radius: 6px;
         font-size: 0.85em !important; 
-    }
-    
-    /* NUEVO FIX SÚPER DEFINITIVO: Obligar a la barra lateral a ser más ancha en celulares */
-    @media (max-width: 768px) {
-        section[data-testid="stSidebar"] {
-            width: 85vw !important; /* 85% del ancho de la pantalla */
-            min-width: 320px !important;
-        }
     }
     
     .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
