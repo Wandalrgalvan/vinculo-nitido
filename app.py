@@ -163,7 +163,7 @@ with st.sidebar:
         """, unsafe_allow_html=True)
         
         st.markdown("""
-        <a href="TU_LINK_DE_MERCADO_PAGO_AQUI" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
+        <a href="https://mpago.la/2TQBp3a" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
             <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s; word-wrap: break-word;">
                 <span style="font-weight: bold; font-size: 0.9em;">🇦🇷 Opción Argentina</span><br>
                 <span style="font-size: 0.75em;">Pagar en Pesos (Mercado Pago)</span>
