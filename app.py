@@ -172,7 +172,7 @@ with st.sidebar:
                     {
                         "title": "Pase VIP - Vínculo Nítido",
                         "quantity": 1,
-                        "unit_price": 5900.0,
+                        "unit_price": 10.0,
                         "currency_id": "ARS"
                     }
                 ]
