@@ -172,10 +172,13 @@ with st.sidebar:
                     {
                         "title": "Pase VIP - Vínculo Nítido",
                         "quantity": 1,
-                        "unit_price": 150.0,
+                        "unit_price": 5900.0,
                         "currency_id": "ARS"
                     }
-                ]
+                ],
+                # ESTO ES LO QUE SOLUCIONA EL ERROR:
+                "binary_mode": True,
+                "purpose": "wallet_purchase" 
             }
             preference_response = sdk.preference().create(preference_data)
             
