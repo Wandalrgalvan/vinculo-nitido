@@ -164,22 +164,37 @@ with st.sidebar:
         </a>
         """, unsafe_allow_html=True)
         
-        # --- BOTÓN MERCADO PAGO DINÁMICO ---
+       # --- BOTÓN MERCADO PAGO DINÁMICO ---
         try:
-            sdk = mercadopago.SDK(st.secrets.get("MP_ACCESS_TOKEN", ""))
+            sdk = mercadopago.SDK(st.secrets["MP_ACCESS_TOKEN"])
             preference_data = {
                 "items": [
                     {
                         "title": "Pase VIP - Vínculo Nítido",
                         "quantity": 1,
-                        "unit_price": 5900.0, # <--- ¡Aquí está el precio oficial!
+                        "unit_price": 5900.0,
                         "currency_id": "ARS"
                     }
                 ]
             }
             preference_response = sdk.preference().create(preference_data)
-            link_oficial_mp = preference_response["response"]["init_point"]
             
+            # Verificamos si Mercado Pago nos dio el link correctamente
+            if "response" in preference_response and "init_point" in preference_response["response"]:
+                link_oficial_mp = preference_response["response"]["init_point"]
+                st.markdown(f"""
+                <a href="{link_oficial_mp}" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
+                    <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s; word-wrap: break-word;">
+                        <span style="font-weight: bold; font-size: 0.9em;">🇦🇷 Opción Argentina ($5.900 ARS)</span><br>
+                        <span style="font-size: 0.75em;">Pagar con Mercado Pago</span>
+                    </div>
+                </a>
+                """, unsafe_allow_html=True)
+            else:
+                st.error(f"Error de Mercado Pago: {preference_response}")
+                
+        except Exception as e:
+            st.error(f"Error técnico: {e}")
             # Usamos tu mismo diseño visual, pero con el link generado en vivo
             st.markdown(f"""
             <a href="{link_oficial_mp}" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
