@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from datetime import datetime
 import json
+import mercadopago # <-- ¡AQUÍ ESTÁ LA MAGIA NUEVA!
 
 # --- CONFIG VISUAL Y PSICOLOGÍA DEL COLOR ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="centered")
@@ -153,6 +154,7 @@ with st.sidebar:
         st.markdown("<h4 style='text-align: center; color: #5EEAD4; margin-bottom: 5px;'>🔓 Decodifica su mente</h4>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-size: 0.85em; color: #94A3B8; margin-bottom: 20px;'>Accede al Laboratorio VIP y al Consultorio Soberano para traducir sus verdaderas intenciones.</p>", unsafe_allow_html=True)
         
+        # --- BOTÓN GUMROAD ---
         st.markdown("""
         <a href="TU_LINK_DE_GUMROAD_AQUI" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
             <div style="background-color: #0F172A; border: 1px solid #14B8A6; color: white; padding: 12px; border-radius: 6px; text-align: center; transition: 0.3s; margin-bottom: 10px; word-wrap: break-word;">
@@ -162,16 +164,36 @@ with st.sidebar:
         </a>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
-        <a href="https://mpago.la/2TQBp3a" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
-            <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s; word-wrap: break-word;">
-                <span style="font-weight: bold; font-size: 0.9em;">🇦🇷 Opción Argentina</span><br>
-                <span style="font-size: 0.75em;">Pagar en Pesos (Mercado Pago)</span>
-            </div>
-        </a>
-        """, unsafe_allow_html=True)
+        # --- BOTÓN MERCADO PAGO DINÁMICO ---
+        try:
+            sdk = mercadopago.SDK(st.secrets.get("MP_ACCESS_TOKEN", ""))
+            preference_data = {
+                "items": [
+                    {
+                        "title": "Pase VIP - Vínculo Nítido",
+                        "quantity": 1,
+                        "unit_price": 5900.0, # <--- ¡Aquí está el precio oficial!
+                        "currency_id": "ARS"
+                    }
+                ]
+            }
+            preference_response = sdk.preference().create(preference_data)
+            link_oficial_mp = preference_response["response"]["init_point"]
+            
+            # Usamos tu mismo diseño visual, pero con el link generado en vivo
+            st.markdown(f"""
+            <a href="{link_oficial_mp}" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
+                <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s; word-wrap: break-word;">
+                    <span style="font-weight: bold; font-size: 0.9em;">🇦🇷 Opción Argentina ($5.900 ARS)</span><br>
+                    <span style="font-size: 0.75em;">Pagar con Mercado Pago</span>
+                </div>
+            </a>
+            """, unsafe_allow_html=True)
+        except Exception as e:
+            # Si hay un error conectando, muestra esto en lugar de romperse
+            st.markdown("<p style='text-align: center; font-size: 0.75em; color: #EF4444;'>Conectando pasarela local...</p>", unsafe_allow_html=True)
         
-        st.markdown("<p style='text-align: center; font-size: 0.75em; color: #64748B; margin-top: 10px;'>Si usas Mercado Pago, envíame el comprobante por Instagram para habilitar tu clave.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; font-size: 0.75em; color: #64748B; margin-top: 10px;'>🔒 Tu clave VIP será enviada automáticamente a tu correo tras el pago.</p>", unsafe_allow_html=True)
     else:
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
         with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
