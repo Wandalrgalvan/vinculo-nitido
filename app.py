@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from datetime import datetime
 import json
-import mercadopago # <-- ¡AQUÍ ESTÁ LA MAGIA NUEVA!
+import mercadopago 
 
 # --- CONFIG VISUAL Y PSICOLOGÍA DEL COLOR ---
 st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="centered")
@@ -33,7 +33,7 @@ st.markdown("""
         border-left: 4px solid #14B8A6; 
         margin-bottom: 20px; 
         font-size: 0.95em; 
-        color: #FFFFFF !important; /* Texto forzado a blanco */
+        color: #FFFFFF !important;
     }
     
     .stButton>button {
@@ -49,8 +49,8 @@ st.markdown("""
 
     /* --- EL FIX DE LAS CAJAS DE TEXTO INVISIBLES --- */
     .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input, div[data-baseweb="select"]>div {
-        background-color: #1E293B !important; /* Ahora el fondo es un azul oscuro sólido, no transparente */
-        color: #F8FAFC !important; /* Letras blancas */
+        background-color: #1E293B !important; 
+        color: #F8FAFC !important; 
         border: 1px solid #334155 !important; 
         border-radius: 6px;
         font-size: 0.85em !important; 
@@ -264,7 +264,6 @@ tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "�
 with tab1:
     st.header("Descubre su Patrón Cerebral")
     
-    # UX TEXT: TAB 1
     st.markdown("<div class='instruction-box'><b>¿Para qué sirve?</b> Este test gratuito identifica su patrón de comportamiento primario. Saber esto te permitirá entender por qué reacciona de cierta manera ante la cercanía.</div>", unsafe_allow_html=True)
     
     st.markdown("<p class='muted'>Responde estas 3 preguntas para identificar su estilo de apego.</p>", unsafe_allow_html=True)
@@ -335,7 +334,6 @@ with tab1:
 with tab2:
     st.subheader("¿Mensaje confuso?")
     
-    # UX TEXT: TAB 2
     st.markdown("<div class='instruction-box'><b>¿Cómo usarlo?</b> Pega ese mensaje suelto que te dejó con dudas. El sistema aislará las palabras y traducirá la intención real oculta tras ellas.</div>", unsafe_allow_html=True)
     
     consent = st.checkbox("Acepto que este análisis es informativo, basado en patrones de comportamiento, y no sustituye terapia.")
@@ -348,7 +346,15 @@ with tab2:
         elif not msg:
             st.error("Falta información. Pega un mensaje para analizar.")
         else:
-            instruccion = "Eres Wanda Soberana. Analiza este mensaje brevemente desde la neurociencia. Sé cruda. NO DES CONSEJOS."
+            # --- NUEVO PROMPT SIMPLE TAB 2 ---
+            instruccion = """
+            Eres Wanda Soberana, mentora experta en relaciones. 
+            Traduce la intención real y oculta de este mensaje. 
+            Menciona la neurociencia (dopamina, cortisol, apego) pero explícalo con palabras SÚPER SIMPLES, coloquiales y fáciles de entender para una mujer que no tiene estudios científicos. 
+            Sé cruda, directa y reveladora. Habla de tú a tú. 
+            REGLA DE ORO: NO uses términos médicos complejos (prohibido decir 'corteza prefrontal', 'hipotálamo', etc.). 
+            NO des consejos, solo expón la verdad de cómo él está manipulando la situación o buscando placer fácil.
+            """
             res = llamar_gemini(msg, instruccion)
             st.markdown(f"<div class='result-box'><h4>👁️ La Verdad Cruda:</h4>{res}</div>", unsafe_allow_html=True)
             st.markdown("#### <span class='vip-title'>👑 Estrategia Soberana (Bloqueada)</span>", unsafe_allow_html=True)
@@ -363,12 +369,10 @@ with tab3:
     perfil = st.session_state.perfil_el
     nombre_mostrar = perfil.get('nombre', '').strip()
     
-    # UX TEXT: ALERTA DE PERFIL VACÍO PARA EVITAR ERRORES COMO EL DE TU AMIGO
     if not nombre_mostrar:
         st.error("⚠️ **ACCIÓN REQUERIDA:** Despliega el 'Perfil del Vínculo' en el menú de la izquierda y guarda sus datos antes de iniciar. El Laboratorio necesita esta información base.")
         nombre_mostrar = "Sujeto"
         
-    # UX TEXT: TAB 3
     st.markdown("<div class='instruction-box'><b>Protocolo Avanzado:</b> Pega aquí el historial completo de la conversación (puedes copiar y pegar directo de WhatsApp). La metodología cruzará estos textos con el perfil psicológico que cargaste para entregarte su estado químico y tu estrategia de respuesta.</div>", unsafe_allow_html=True)
 
     st.success(f"🔓 Laboratorio Clínico | Analizando a: {nombre_mostrar} ({perfil.get('edad', 30)} años) | {perfil.get('tipo_relacion', '')}")
@@ -379,15 +383,24 @@ with tab3:
             st.error("Se requiere el historial de mensajes para iniciar el protocolo.")
         else:
             with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad)"):
+                # --- NUEVO PROMPT SIMPLE TAB 3 (LAB VIP) ---
                 instruccion = f"""
-                Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en Neurociencia y Apego. 
-                Tu análisis debe ser científico, crudo pero profundamente empático con la usuaria. NUNCA digas que eres IA.
-                Sujeto a analizar: {nombre_mostrar}, Edad: {perfil.get('edad', 30)}, Tipo de Vínculo: {perfil.get('tipo_relacion', 'No sé')}, Apego: {perfil.get('apego','No sé')}, Historia de Crianza: {perfil.get('historia','No sé')}.
+                Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en relaciones y comportamiento humano.
+                Tu análisis debe ser crudo, directo, revelador, pero profundamente empático con la usuaria. NUNCA digas que eres IA.
+                Sujeto a analizar: {nombre_mostrar}, Edad: {perfil.get('edad', 30)}, Tipo de Vínculo: {perfil.get('tipo_relacion', 'No sé')}, Apego: {perfil.get('apego','No sé')}.
                 
+                REGLA DE ORO: Escribe de forma SÚPER SIMPLE, coloquial y fácil de entender. Habla como una amiga sabia y directa. ESTÁ ESTRICTAMENTE PROHIBIDO usar términos médicos, académicos o psicológicos complejos (nada de 'hipotálamo', 'corteza', 'sistema límbico', 'gaslighting', 'override', etc.). Si hablas de química, usa solo "dopamina" (adicción/placer rápido) o "cortisol" (estrés/ansiedad) y explícalo en lenguaje de calle.
+
                 Devuelve exactamente 3 bloques usando Markdown:
-                1. 🧬 QUÍMICA CEREBRAL: Explica sus niveles de dopamina/cortisol frente a la interacción.
-                2. 👁️ TRADUCCIÓN NÍTIDA: Qué dice él vs. Qué dictan sus intenciones reales de control/apego.
-                3. 👑 ESTRATEGIA SOBERANA: Qué debe responder la usuaria exactamente para recuperar el poder.
+                
+                ### 1. 🧬 LA QUÍMICA DEL MOMENTO
+                Explica brevemente (máximo 2 párrafos cortos) qué está pasando en la cabeza de él y de ella. Ejemplo: "Él te busca para un shot rápido de dopamina (placer sin esfuerzo), mientras a ti te sube el cortisol (estrés) por la incertidumbre."
+                
+                ### 2. 👁️ LA VERDAD CRUDA (Traducción)
+                Toma 2 o 3 frases clave de lo que él dijo y traduce qué significan realmente en su idioma de manipulación o evasión. Desnuda sus excusas.
+                
+                ### 3. 👑 TU MOVIMIENTO SOBERANO
+                Dile exactamente cómo recuperar el poder. Dale una (y solo una) frase literal, corta y fría que debe copiar y pegar para responderle, o indícale si debe clavar el visto.
                 """
                 salida = llamar_gemini(chat, instruccion)
                 st.markdown("<div class='result-box'>", unsafe_allow_html=True)
@@ -401,7 +414,6 @@ with tab4:
         
     st.subheader("🛋️ Consultorio Soberano")
     
-    # UX TEXT: TAB 4
     st.markdown("<div class='instruction-box'><b>Tu Espacio Seguro:</b> Aquí no analizamos mensajes, aquí hablamos de ti. Cuéntame la situación con tus propias palabras, haz catarsis o pide claridad. Te escucharé y responderé como tu mentora personal.</div>", unsafe_allow_html=True)
     
     st.markdown("<p class='muted'>Un espacio bidireccional para procesar dudas o relatos extensos. Cuéntame qué pasó y hablemos.</p>", unsafe_allow_html=True)
@@ -426,15 +438,23 @@ with tab4:
 
                 with st.spinner("Procesando tu relato..."):
                     nombre_consultorio = st.session_state.perfil_el.get('nombre', '').strip() or "el sujeto"
+                    # --- NUEVO PROMPT RESTRINGIDO TAB 4 (CONSULTORIO) ---
                     instruccion_consultorio = f"""
                     Eres Wanda Soberana. Estás en una sesión de mentoría 1 a 1 (Consultorio Soberano).
                     La usuaria te está contando situaciones de su vida, su relación con {nombre_consultorio} (Tipo de Vínculo: {st.session_state.perfil_el.get('tipo_relacion', 'No sé')}, Apego: {st.session_state.perfil_el.get('apego', 'No sé')}) o dudas sobre su valor y proyectos.
-                    Tono: Eres una mentora cruda, validas profundamente sus emociones, le das claridad clínica sobre lo que está viviendo y la empoderas. Dialogas de tú a tú, no como un reporte.
+                    
+                    Tono: Eres una mentora cruda, validas profundamente sus emociones, le das claridad clínica sobre lo que está viviendo y la empoderas. Dialogas de tú a tú.
+                    
+                    REGLA DE ORO DE FORMATO (¡ESTRICTO!): 
+                    1. Tu respuesta debe ser CORTA, ÁGIL y DIRECTA, simulando un chat real.
+                    2. MÁXIMO 3 párrafos cortos. ¡Prohibido escribir testamentos!
+                    3. Ve directo al hueso del problema. No des vueltas.
+                    4. Termina SIEMPRE con UNA sola pregunta poderosa y corta que la haga reflexionar y continuar la charla.
                     
                     HISTORIAL DE LA CHARLA RECIENTE:
                     {historial_str}
                     
-                    Responde al último mensaje de la usuaria continuando la conversación de forma natural y terapéutica.
+                    Responde al último mensaje de la usuaria aplicando estrictamente estas reglas de longitud.
                     """
                     respuesta_wanda = llamar_gemini(nueva_consulta, instruccion_consultorio)
                     st.session_state.mensajes_consultorio.append({"rol": "wanda", "texto": respuesta_wanda})
@@ -445,4 +465,13 @@ with tab4:
             st.rerun()
 
 st.markdown("---")
+
+# --- NUEVO BLOQUE: ESCUDO LEGAL Y PRIVACIDAD ---
+with st.expander("⚖️ Términos, Privacidad y Aviso Legal"):
+    st.markdown("""
+    **1. Naturaleza del Servicio:** Vínculo Nítido es una herramienta educativa y de análisis basada en patrones de comportamiento. NO es un diagnóstico médico ni psicológico, y NO reemplaza la terapia profesional con un especialista en salud mental.  
+    **2. Privacidad Absoluta:** Tus chats y relatos son tuyos. No almacenamos tus conversaciones en bases de datos para lectura humana. Los textos se envían de forma cifrada al motor de análisis y se descartan inmediatamente tras generar la respuesta.  
+    **3. Política de Reembolso:** Al tratarse de un producto digital de consumo y entrega inmediata (Pase VIP), no se realizan reembolsos una vez procesado el pago y enviada la clave de acceso.
+    """, unsafe_allow_html=True)
+
 st.markdown("<div class='muted'>Vínculo Nítido © 2026 | Metodología Soberana</div>", unsafe_allow_html=True)
