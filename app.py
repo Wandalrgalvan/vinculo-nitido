@@ -14,6 +14,18 @@ st.markdown("""
     h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; color: #5EEAD4 !important; font-weight: 600; }
     .stRadio label p { color: #FFFFFF !important; font-size: 1.05em !important; font-family: 'Roboto', sans-serif !important; }
     .muted { color: #E2E8F0; font-size: 0.95em; }
+    
+    /* --- NUEVA CLASE UX PARA INSTRUCCIONES --- */
+    .instruction-box { 
+        background: rgba(20, 184, 166, 0.1); 
+        padding: 15px; 
+        border-radius: 8px; 
+        border-left: 4px solid #14B8A6; 
+        margin-bottom: 20px; 
+        font-size: 0.95em; 
+        color: #E2E8F0;
+    }
+    
     .stButton>button {
         background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);
         color: #FFFFFF; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
@@ -139,6 +151,9 @@ with st.sidebar:
     st.markdown("<h3 style='text-align: center;'>Vínculo Nítido</h3>", unsafe_allow_html=True)
 
     if not st.session_state.logged_in:
+        # UX TEXT: INGRESO VIP
+        st.markdown("<div class='instruction-box'><b>👋 Bienvenida:</b> Si ya tienes tu clave, ingrésala abajo. Si aún no tienes pase, elige una opción de pago para desbloquear la metodología completa.</div>", unsafe_allow_html=True)
+        
         st.info("🔐 Acceso VIP")
         clave = st.text_input("Ingresa tu Clave VIP:", type="password")
         if st.button("INGRESAR"):
@@ -176,13 +191,11 @@ with st.sidebar:
                         "currency_id": "ARS"
                     }
                 ],
-                # ESTO ES LO QUE SOLUCIONA EL ERROR:
                 "binary_mode": True,
                 "purpose": "wallet_purchase" 
             }
             preference_response = sdk.preference().create(preference_data)
             
-            # Verificamos si Mercado Pago nos dio el link correctamente
             if "response" in preference_response and "init_point" in preference_response["response"]:
                 link_oficial_mp = preference_response["response"]["init_point"]
                 st.markdown(f"""
@@ -198,7 +211,6 @@ with st.sidebar:
                 
         except Exception as e:
             st.error(f"Error técnico: {e}")
-            # Usamos tu mismo diseño visual, pero con el link generado en vivo
             st.markdown(f"""
             <a href="{link_oficial_mp}" target="_blank" style="text-decoration: none; display: block; width: 100%; box-sizing: border-box;">
                 <div style="background-color: transparent; border: 1px dashed #475569; color: #CBD5E1; padding: 10px; border-radius: 6px; text-align: center; transition: 0.3s; word-wrap: break-word;">
@@ -208,12 +220,15 @@ with st.sidebar:
             </a>
             """, unsafe_allow_html=True)
         except Exception as e:
-            # Si hay un error conectando, muestra esto en lugar de romperse
             st.markdown("<p style='text-align: center; font-size: 0.75em; color: #EF4444;'>Conectando pasarela local...</p>", unsafe_allow_html=True)
         
         st.markdown("<p style='text-align: center; font-size: 0.75em; color: #64748B; margin-top: 10px;'>🔒 Tu clave VIP será enviada automáticamente a tu correo tras el pago.</p>", unsafe_allow_html=True)
     else:
         st.success("👩🏻‍💼 Bienvenida, Soberana.")
+        
+        # UX TEXT: INSTRUCCIÓN PARA COMPLETAR EL PERFIL
+        st.markdown("<div class='instruction-box'><b>🚨 Paso Indispensable:</b> Completa el perfil de tu vínculo. Nuestro sistema requiere este contexto clínico para calibrar la decodificación.</div>", unsafe_allow_html=True)
+
         with st.expander("👩🏻‍💼 Perfil del Vínculo", expanded=True):
             with st.form("perfil"):
                 p_nombre = st.text_input("Nombre:", value=st.session_state.perfil_el.get("nombre", ""))
@@ -256,6 +271,10 @@ tab1, tab2, tab3, tab4 = st.tabs(["🧬 Test Apego", "👁️ Verdad Oculta", "�
 # --- TAB 1: TEST GRATIS ---
 with tab1:
     st.header("Descubre su Patrón Cerebral")
+    
+    # UX TEXT: TAB 1
+    st.markdown("<div class='instruction-box'><b>¿Para qué sirve?</b> Este test gratuito identifica su patrón de comportamiento primario. Saber esto te permitirá entender por qué reacciona de cierta manera ante la cercanía.</div>", unsafe_allow_html=True)
+    
     st.markdown("<p class='muted'>Responde estas 3 preguntas para identificar su estilo de apego.</p>", unsafe_allow_html=True)
 
     r1 = st.radio("1. Ante la intimidad y la cercanía emocional, él:", 
@@ -323,6 +342,10 @@ with tab1:
 
 with tab2:
     st.subheader("¿Mensaje confuso?")
+    
+    # UX TEXT: TAB 2
+    st.markdown("<div class='instruction-box'><b>¿Cómo usarlo?</b> Pega ese mensaje suelto que te dejó con dudas. El sistema aislará las palabras y traducirá la intención real oculta tras ellas.</div>", unsafe_allow_html=True)
+    
     consent = st.checkbox("Acepto que este análisis es informativo, basado en patrones de comportamiento, y no sustituye terapia.")
     st.session_state.consent = consent
     
@@ -347,9 +370,15 @@ with tab3:
 
     perfil = st.session_state.perfil_el
     nombre_mostrar = perfil.get('nombre', '').strip()
+    
+    # UX TEXT: ALERTA DE PERFIL VACÍO PARA EVITAR ERRORES COMO EL DE TU AMIGO
     if not nombre_mostrar:
+        st.error("⚠️ **ACCIÓN REQUERIDA:** Despliega el 'Perfil del Vínculo' en el menú de la izquierda y guarda sus datos antes de iniciar. El Laboratorio necesita esta información base.")
         nombre_mostrar = "Sujeto"
         
+    # UX TEXT: TAB 3
+    st.markdown("<div class='instruction-box'><b>Protocolo Avanzado:</b> Pega aquí el historial completo de la conversación (puedes copiar y pegar directo de WhatsApp). La metodología cruzará estos textos con el perfil psicológico que cargaste para entregarte su estado químico y tu estrategia de respuesta.</div>", unsafe_allow_html=True)
+
     st.success(f"🔓 Laboratorio Clínico | Analizando a: {nombre_mostrar} ({perfil.get('edad', 30)} años) | {perfil.get('tipo_relacion', '')}")
 
     chat = st.text_area("Pega la interacción de texto completa (WhatsApp/Redes):", height=200)
@@ -379,6 +408,10 @@ with tab4:
         st.stop()
         
     st.subheader("🛋️ Consultorio Soberano")
+    
+    # UX TEXT: TAB 4
+    st.markdown("<div class='instruction-box'><b>Tu Espacio Seguro:</b> Aquí no analizamos mensajes, aquí hablamos de ti. Cuéntame la situación con tus propias palabras, haz catarsis o pide claridad. Te escucharé y responderé como tu mentora personal.</div>", unsafe_allow_html=True)
+    
     st.markdown("<p class='muted'>Un espacio bidireccional para procesar dudas o relatos extensos. Cuéntame qué pasó y hablemos.</p>", unsafe_allow_html=True)
 
     for mensaje in st.session_state.mensajes_consultorio:
