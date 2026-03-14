@@ -10,63 +10,55 @@ st.set_page_config(page_title="Vínculo Nítido", page_icon="💎", layout="cent
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap');
-    .stApp { background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); color: #F8FAFC; font-family: 'Roboto', sans-serif; }
+    
+    /* --- FONDO PRINCIPAL Y BARRA LATERAL (Forzamos Modo Oscuro) --- */
+    .stApp, [data-testid="stSidebar"] { 
+        background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%) !important; 
+        color: #F8FAFC !important; 
+        font-family: 'Roboto', sans-serif; 
+    }
+    
+    /* Forzar que los textos sueltos no se pongan negros */
+    p, span, div, label { color: #F8FAFC !important; }
+    
     h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; color: #5EEAD4 !important; font-weight: 600; }
     .stRadio label p { color: #FFFFFF !important; font-size: 1.05em !important; font-family: 'Roboto', sans-serif !important; }
-    .muted { color: #E2E8F0; font-size: 0.95em; }
+    .muted { color: #94A3B8 !important; font-size: 0.95em; }
     
-    /* --- NUEVA CLASE UX PARA INSTRUCCIONES --- */
+    /* --- CAJAS DE INSTRUCCIONES UX --- */
     .instruction-box { 
-        background: rgba(20, 184, 166, 0.1); 
+        background: rgba(20, 184, 166, 0.15) !important; 
         padding: 15px; 
         border-radius: 8px; 
         border-left: 4px solid #14B8A6; 
         margin-bottom: 20px; 
         font-size: 0.95em; 
-        color: #E2E8F0;
+        color: #FFFFFF !important; /* Texto forzado a blanco */
     }
     
     .stButton>button {
-        background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);
-        color: #FFFFFF; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
+        background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%) !important;
+        color: #FFFFFF !important; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
     }
-    .stButton>button:hover { filter: brightness(1.1); }
+    .stButton>button:hover { filter: brightness(1.1); color: #FFFFFF !important; }
     
-    /* FIX DE TEXTOS LARGOS: Forzar salto de línea sin romper la barra */
-    div[data-baseweb="select"] > div:first-child {
-        height: auto !important;
-        min-height: 38px !important;
-    }
-    div[data-baseweb="select"] span {
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-        display: block !important;
-        line-height: 1.3 !important;
-    }
-    ul[role="listbox"] li {
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        height: auto !important;
-        min-height: 40px !important;
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
-        line-height: 1.3 !important;
-    }
+    /* FIX DE TEXTOS LARGOS EN MENÚS */
+    div[data-baseweb="select"] > div:first-child { height: auto !important; min-height: 38px !important; }
+    div[data-baseweb="select"] span { white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; text-overflow: clip !important; display: block !important; line-height: 1.3 !important; }
+    ul[role="listbox"] li { white-space: normal !important; word-wrap: break-word !important; height: auto !important; min-height: 40px !important; padding-top: 8px !important; padding-bottom: 8px !important; line-height: 1.3 !important; }
 
-    /* Ajuste de cajitas */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input, div[data-baseweb="select"] {
-        background-color: rgba(255, 255, 255, 0.05) !important; 
-        color: white !important; 
-        border: 1px solid #334155; 
+    /* --- EL FIX DE LAS CAJAS DE TEXTO INVISIBLES --- */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input, div[data-baseweb="select"]>div {
+        background-color: #1E293B !important; /* Ahora el fondo es un azul oscuro sólido, no transparente */
+        color: #F8FAFC !important; /* Letras blancas */
+        border: 1px solid #334155 !important; 
         border-radius: 6px;
         font-size: 0.85em !important; 
     }
     
-    .result-box { background: rgba(15, 23, 42, 0.6); padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .chat-user { background: rgba(20, 184, 166, 0.1); padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; }
-    .chat-bot { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; }
+    .result-box { background: rgba(15, 23, 42, 0.6) !important; padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .chat-user { background: rgba(20, 184, 166, 0.1) !important; padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; color: #FFFFFF !important; }
+    .chat-bot { background: rgba(255, 255, 255, 0.05) !important; padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; color: #FFFFFF !important; }
     .blur-text { filter: blur(5px); opacity: 0.6; pointer-events: none; }
     .vip-title { color: #D4AF37 !important; }
     </style>
