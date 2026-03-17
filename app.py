@@ -11,75 +11,74 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap');
     
-    /* --- FONDO PRINCIPAL Y BARRA LATERAL (Forzamos Modo Oscuro) --- */
-    .stApp, [data-testid="stSidebar"] { 
-        background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%) !important; 
+    /* --- FONDO PRINCIPAL ABSOLUTO --- */
+    .stApp, .main, [data-testid="stSidebar"] { 
+        background-color: #0F172A !important; 
+        background-image: none !important;
         color: #F8FAFC !important; 
-        font-family: 'Roboto', sans-serif; 
+        font-family: 'Roboto', sans-serif;
     }
     
-    /* Forzar que los textos sueltos no se pongan negros */
-    p, span, div, label { color: #F8FAFC !important; }
-    
+    /* Forzar TODO el texto a blanco para matar el "Modo Claro" del celular */
+    p, span, div, label, h1, h2, h3, h4, h5, h6, li { 
+        color: #F8FAFC !important; 
+    }
     h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; color: #5EEAD4 !important; font-weight: 600; }
-    .stRadio label p { color: #FFFFFF !important; font-size: 1.05em !important; font-family: 'Roboto', sans-serif !important; }
-    .muted { color: #94A3B8 !important; font-size: 0.95em; }
     
-    /* --- CAJAS DE INSTRUCCIONES UX --- */
-    .instruction-box { 
-        background: rgba(20, 184, 166, 0.15) !important; 
-        padding: 15px; 
-        border-radius: 8px; 
-        border-left: 4px solid #14B8A6; 
-        margin-bottom: 20px; 
-        font-size: 0.95em; 
+    /* --- EL FIX DE LAS CAJAS DE TEXTO Y LETRAS PEQUEÑAS --- */
+    /* El font-size: 16px evita el auto-zoom en celulares y hace legible el texto */
+    .stTextInput input, .stTextArea textarea, .stNumberInput input {
+        background-color: #1E293B !important; 
+        color: #FFFFFF !important; 
+        -webkit-text-fill-color: #FFFFFF !important; /* Fundamental para celulares */
+        font-size: 16px !important; 
+        line-height: 1.5 !important;
+        padding: 10px !important;
+        border: 1px solid #475569 !important;
+        border-radius: 6px !important;
+    }
+
+    /* --- EL FIX DE LOS MENÚS DESPLEGABLES Y LAS ENCUESTAS --- */
+    div[data-baseweb="select"] > div {
+        background-color: #1E293B !important;
+        border: 1px solid #475569 !important;
         color: #FFFFFF !important;
     }
     
+    /* Fondo de la lista que se despliega */
+    div[role="listbox"], ul[role="listbox"], [data-baseweb="menu"], [data-testid="stSelectboxVirtualDropdown"] {
+        background-color: #1E293B !important;
+    }
+    
+    /* Las opciones a tildar dentro de la lista */
+    li[role="option"] {
+        background-color: #1E293B !important;
+        color: #FFFFFF !important;
+        font-size: 16px !important;
+    }
+    li[role="option"]:hover {
+        background-color: #334155 !important;
+    }
+
+    /* --- OPCIONES DE LA ENCUESTA (Radio buttons) --- */
+    .stRadio label {
+        color: #FFFFFF !important;
+        font-size: 16px !important;
+    }
+
+    /* --- BOTONES --- */
     .stButton>button {
         background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%) !important;
         color: #FFFFFF !important; font-weight: bold; border-radius: 8px; border: none; width: 100%; padding: 12px; transition: all 0.3s ease;
     }
     .stButton>button:hover { filter: brightness(1.1); color: #FFFFFF !important; }
     
-    /* FIX DE TEXTOS LARGOS EN MENÚS DESPLEGABLES Y COLORES */
-    div[data-baseweb="select"] > div:first-child { height: auto !important; min-height: 38px !important; }
-    div[data-baseweb="select"] span { white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; text-overflow: clip !important; display: block !important; line-height: 1.3 !important; }
-    
-    /* FIX: Color de fondo y texto de las opciones desplegables */
-    ul[role="listbox"] { background-color: #1E293B !important; }
-    ul[role="listbox"] li { 
-        white-space: normal !important; 
-        word-wrap: break-word !important; 
-        height: auto !important; 
-        min-height: 40px !important; 
-        padding-top: 8px !important; 
-        padding-bottom: 8px !important; 
-        line-height: 1.3 !important; 
-        color: #F8FAFC !important; /* Fuerza el texto blanco */
-    }
-    /* Efecto al pasar el mouse por las opciones */
-    ul[role="listbox"] li:hover { background-color: #334155 !important; }
-
-    /* --- EL FIX DE LAS CAJAS DE TEXTO (Para que se vea bien lo que se escribe) --- */
-    /* Apuntamos específicamente a los inputs reales */
-    .stTextInput input, .stTextArea textarea, .stNumberInput input {
-        background-color: #0F172A !important; 
-        color: #F8FAFC !important; /* Texto blanco brillante */
-        -webkit-text-fill-color: #F8FAFC !important; /* Fix específico para iOS/Safari */
-        font-size: 16px !important; /* Evita el auto-zoom en iPhone y mejora legibilidad */
-    }
-    
-    /* Fondo del contenedor de las cajas de texto y selects */
-    .stTextInput>div>div, .stTextArea>div>div, .stNumberInput>div>div, div[data-baseweb="select"]>div {
-        background-color: #1E293B !important; 
-        border: 1px solid #334155 !important; 
-        border-radius: 6px;
-    }
-    
+    /* --- CAJAS DE DISEÑO --- */
+    .instruction-box { background: rgba(20, 184, 166, 0.15) !important; padding: 15px; border-radius: 8px; border-left: 4px solid #14B8A6; margin-bottom: 20px; font-size: 0.95em; color: #FFFFFF !important; }
     .result-box { background: rgba(15, 23, 42, 0.6) !important; padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .chat-user { background: rgba(20, 184, 166, 0.1) !important; padding: 15px; border-radius: 8px 8px 0px 8px; margin-bottom: 10px; border-right: 3px solid #14B8A6; text-align: right; color: #FFFFFF !important; }
     .chat-bot { background: rgba(255, 255, 255, 0.05) !important; padding: 15px; border-radius: 8px 8px 8px 0px; margin-bottom: 10px; border-left: 3px solid #D4AF37; color: #FFFFFF !important; }
+    .muted { color: #94A3B8 !important; font-size: 0.95em; }
     .blur-text { filter: blur(5px); opacity: 0.6; pointer-events: none; }
     .vip-title { color: #D4AF37 !important; }
     </style>
@@ -387,7 +386,6 @@ with tab2:
         elif not msg:
             st.error("Falta información. Pega un mensaje para analizar.")
         else:
-            # --- NUEVO PROMPT SIMPLE TAB 2 ---
             instruccion = """
             Eres Wanda Soberana, mentora experta en relaciones. 
             Traduce la intención real y oculta de este mensaje. 
@@ -424,7 +422,6 @@ with tab3:
             st.error("Se requiere el historial de mensajes para iniciar el protocolo.")
         else:
             with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad de tu interacción)"):
-                # --- NUEVO PROMPT SIMPLE TAB 3 (LAB VIP) ---
                 instruccion = f"""
                 Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en relaciones y comportamiento humano.
                 Tu análisis debe ser crudo, directo, revelador, pero profundamente empático con la usuaria. NUNCA digas que eres IA.
@@ -479,7 +476,6 @@ with tab4:
 
                 with st.spinner("Procesando tu relato..."):
                     nombre_consultorio = st.session_state.perfil_el.get('nombre', '').strip() or "el sujeto"
-                    # --- NUEVO PROMPT RESTRINGIDO TAB 4 (CONSULTORIO) ---
                     instruccion_consultorio = f"""
                     Eres Wanda Soberana. Estás en una sesión de mentoría 1 a 1 (Consultorio Soberano).
                     La usuaria te está contando situaciones de su vida, su relación con {nombre_consultorio} (Tipo de Vínculo: {st.session_state.perfil_el.get('tipo_relacion', 'No sé')}, Apego: {st.session_state.perfil_el.get('apego', 'No sé')}) o dudas sobre su valor y proyectos.
