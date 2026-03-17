@@ -42,18 +42,39 @@ st.markdown("""
     }
     .stButton>button:hover { filter: brightness(1.1); color: #FFFFFF !important; }
     
-    /* FIX DE TEXTOS LARGOS EN MENÚS */
+    /* FIX DE TEXTOS LARGOS EN MENÚS DESPLEGABLES Y COLORES */
     div[data-baseweb="select"] > div:first-child { height: auto !important; min-height: 38px !important; }
     div[data-baseweb="select"] span { white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; text-overflow: clip !important; display: block !important; line-height: 1.3 !important; }
-    ul[role="listbox"] li { white-space: normal !important; word-wrap: break-word !important; height: auto !important; min-height: 40px !important; padding-top: 8px !important; padding-bottom: 8px !important; line-height: 1.3 !important; }
+    
+    /* FIX: Color de fondo y texto de las opciones desplegables */
+    ul[role="listbox"] { background-color: #1E293B !important; }
+    ul[role="listbox"] li { 
+        white-space: normal !important; 
+        word-wrap: break-word !important; 
+        height: auto !important; 
+        min-height: 40px !important; 
+        padding-top: 8px !important; 
+        padding-bottom: 8px !important; 
+        line-height: 1.3 !important; 
+        color: #F8FAFC !important; /* Fuerza el texto blanco */
+    }
+    /* Efecto al pasar el mouse por las opciones */
+    ul[role="listbox"] li:hover { background-color: #334155 !important; }
 
-    /* --- EL FIX DE LAS CAJAS DE TEXTO INVISIBLES --- */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stNumberInput>div>div>input, div[data-baseweb="select"]>div {
+    /* --- EL FIX DE LAS CAJAS DE TEXTO (Para que se vea bien lo que se escribe) --- */
+    /* Apuntamos específicamente a los inputs reales */
+    .stTextInput input, .stTextArea textarea, .stNumberInput input {
+        background-color: #0F172A !important; 
+        color: #F8FAFC !important; /* Texto blanco brillante */
+        -webkit-text-fill-color: #F8FAFC !important; /* Fix específico para iOS/Safari */
+        font-size: 16px !important; /* Evita el auto-zoom en iPhone y mejora legibilidad */
+    }
+    
+    /* Fondo del contenedor de las cajas de texto y selects */
+    .stTextInput>div>div, .stTextArea>div>div, .stNumberInput>div>div, div[data-baseweb="select"]>div {
         background-color: #1E293B !important; 
-        color: #F8FAFC !important; 
         border: 1px solid #334155 !important; 
         border-radius: 6px;
-        font-size: 0.85em !important; 
     }
     
     .result-box { background: rgba(15, 23, 42, 0.6) !important; padding: 25px; border-left: 4px solid #5EEAD4; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
