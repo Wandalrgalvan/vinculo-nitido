@@ -402,7 +402,7 @@ with tab3:
         if not chat:
             st.error("Se requiere el historial de mensajes para iniciar el protocolo.")
         else:
-            with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad)"):
+            with st.spinner("Procesando patrones neuroconductuales... (Si demora más de 20 segundos, es normal por la complejidad de tu interacción)"):
                 # --- NUEVO PROMPT SIMPLE TAB 3 (LAB VIP) ---
                 instruccion = f"""
                 Eres Wanda Soberana, creadora de 'Vínculo Nítido'. Eres Mentora, experta en relaciones y comportamiento humano.
